@@ -2,6 +2,8 @@
 
 這個資料夾是 MATLAB `Gear_system_Designer` 的 Python 對應工具。它讀取 `data/tooth.csv`，計算太陽齒輪、兩種複合行星齒輪及內齒輪的幾何資料，並繪製齒輪配置、單齒輪齒形和齒輪系組合圖。
 
+也可在瀏覽器使用 [Gear System Designer 網頁版](https://dannyhsuc10.github.io/Transmission-system/)，或依 [專案 README](../README.md#gear-system-designer-網頁版) 啟動本機網頁預覽。
+
 ## 桌面介面
 
 在本資料夾用含 Tkinter 的 Python 3 執行：

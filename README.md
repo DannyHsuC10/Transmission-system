@@ -1,12 +1,30 @@
 # Transmission-system
 
-齒輪傳動系統設計與視覺化工具集。本專案整理了兩組以漸開線齒輪為核心的設計程式：
+齒輪傳動系統設計與視覺化工具集，包含瀏覽器版與本機工具：
 
+- [Gear System Designer 網頁版](https://dannyhsuc10.github.io/Transmission-system/)：複合行星齒輪配置、嚙合預覽、單顆設計、組合搜尋和 CAD 匯出。
+- [`Gear_system_Designer_Python`](Gear_system_Designer_Python/README.md)：Python + Tkinter 的複合行星齒輪設計工具，另有命令列介面。
 - `Gear_Designer`：Python + Tkinter 的單一正齒輪參數計算、草圖與旋轉動畫工具。
 - `Gear_system_Designer`：MATLAB 的行星齒輪系配置、齒形生成與組合視覺化工具。
 - `Gear train calculation table.xlsx`：Excel 齒輪傳動計算表，用於快速整理基本齒輪參數與傳動分析。
 
 專案適合用於齒輪設計初期的幾何計算、齒形檢查、行星齒輪系配置驗證，以及教學展示。
+
+## Gear System Designer 網頁版
+
+在瀏覽器中調整共用模數、四種齒輪的齒數、軸孔和行星輪組數，也可匯入桌面版的 `tooth.csv`。右側可切換節圓配置、兩層嚙合及全組合投影，並縮放、平移或下載圖形。單顆設計支援獨立齒形設定、旋轉預覽及詳細參數；尋找組合可依外廓、齒比和行星輪組數篩選候選齒數，再套用到組合圖。
+
+單顆齒輪可匯出 PNG、SVG、DXF 或 STEP。DXF 使用毫米與封閉輪廓；STEP 使用漸開線樣條、圓弧與指定厚度建立實體。內齒圈匯出 DXF 或 STEP 時，須指定大於齒根圓直徑的外徑。所有輸入、搜尋和檔案產生都在瀏覽器內執行。網頁每顆齒輪支援 1 至 2,000 齒、1 至 100 組行星輪。
+
+網頁版以 [`docs/index.html`](docs/index.html) 和 [`docs/assets/styles.css`](docs/assets/styles.css) 排版，使用原生 JavaScript 計算和繪圖。從專案根目錄啟動本機預覽：
+
+```powershell
+python -m http.server 8000 --directory docs
+```
+
+開啟 [http://localhost:8000/](http://localhost:8000/)。GitHub Pages 設定為 **Settings → Pages → Deploy from a branch → `main` → `/docs`**；之後每次推送至 `main` 會更新網站。不需安裝套件或執行建置。參閱 [GitHub Pages 發布來源說明](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)。
+
+使用 Node.js 22 以上執行 `node --test tests/web-gear.test.mjs`。若已安裝桌面版套件，可再執行 `python tests/check_web_cad.py`，用 ezdxf 和 Open CASCADE 回讀瀏覽器匯出的 DXF 與 STEP。
 
 ## 專案結構
 
@@ -14,6 +32,8 @@
 Transmission-system/
 ├─ Gear train calculation table.xlsx  # 齒輪傳動計算表
 ├─ Gear_Transmission_Sheet.md         # Excel 計算表說明
+├─ docs/                             # GitHub Pages 網頁版（HTML、CSS、JavaScript）
+├─ Gear_system_Designer_Python/       # 複合行星齒輪系的 Python 桌面與命令列工具
 ├─ Gear_Designer/
 │  ├─ Gear_Design_Interface.py        # Python GUI 主程式
 │  ├─ Gear_Design_Interface.md        # Python 工具原說明
