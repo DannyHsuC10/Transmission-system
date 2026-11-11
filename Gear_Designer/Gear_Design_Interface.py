@@ -1,7 +1,7 @@
+import itertools
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.animation as animation
 import data
 import graphics_generator as gg
@@ -9,6 +9,16 @@ import ctypes
 
 ctypes.windll.shcore.SetProcessDpiAwareness(0)
 floatnumber = 4
+gear_figure = None
+gear_canvas = None
+animation_figure = None
+animation_canvas = None
+animation_widget = None
+animation_instance = None
+animation_lines = ()
+animation_line_data = ()
+animation_frame = 0
+animation_frame_offset = 0
 
 def reset():
     M, T, a, d, s, ap, f = 1, 20, 1, 1.25, 1, 20, 0.236
@@ -44,6 +54,7 @@ def confirm_main():
     a, d, s, ap, f = [data.get_value(2, i) for i in range(4, 13, 2)]
     data.table(M, T, a, d, s, ap, f, floatnumber)
     show_data(1)
+    refresh_gear()
 
 def show_main():
     show_data(1)
@@ -60,6 +71,7 @@ def show_Advanced(n):
         g[n + 2] = float(entry1.get())
         data.table(*g)
         show_data(n + 2)
+        refresh_gear()
     
     entry1.delete(0, tk.END)
     show_data(n + 2)
@@ -67,32 +79,101 @@ def show_Advanced(n):
     hide_entry2()
     tk.Button(root, text="確定", command=confirm).place(x=first, y=confirm_y)
 
-def show_gear():
-    fig = plt.figure(linewidth=1, figsize=(5, 5))
+def refresh_gear():
+    if gear_figure is None or gear_canvas is None:
+        return
+    plt.figure(gear_figure.number)
     gg.graphic()
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas.draw()
-    canvas.get_tk_widget().place(x=380, y=50)
+    gear_canvas.draw()
+    refresh_animation()
+
+def show_gear():
+    global gear_figure, gear_canvas
+    if gear_figure is None:
+        gear_figure = plt.figure(linewidth=1, figsize=(5, 5))
+        gear_canvas = FigureCanvasTkAgg(gear_figure, master=root)
+        gear_canvas.get_tk_widget().place(x=380, y=50)
+    refresh_gear()
 
 def show_animate():
-    # 隱藏動畫按鈕
-    btn_animation.place_forget()
+    global animation_figure, animation_canvas, animation_widget
+    global animation_instance
 
-    fig = plt.figure(linewidth=1, figsize=(2.2, 2.2))
-    ani = animation.FuncAnimation(fig, gg.animate, frames=np.arange(0, 500), interval=1, blit=False)
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas.draw()
-    widget = canvas.get_tk_widget()
-    widget.place(x=50, y=350)
+    if animation_instance is not None:
+        return
 
-    def stop_animation():
-        ani.event_source.stop()   # 停止動畫
-        widget.destroy()          # 移除畫布
-        # 恢復動畫按鈕
-        btn_animation.place(x=700, y=10)
+    animation_figure = plt.figure(linewidth=1, figsize=(2.2, 2.2))
+    animation_canvas = FigureCanvasTkAgg(animation_figure, master=root)
+    animation_widget = animation_canvas.get_tk_widget()
+    animation_widget.place(x=50, y=350)
+    refresh_animation()
 
-    # 5 秒後停止動畫並恢復按鈕
-    root.after(5000, stop_animation)
+    def update_animation(frame):
+        global animation_frame
+        animation_frame = frame
+        angle = (frame - animation_frame_offset) / 10.0
+        for line, (theta, radius) in zip(animation_lines, animation_line_data):
+            line.set_data(theta + angle, radius)
+        return animation_lines
+
+    def initialize_animation():
+        for line, (theta, radius) in zip(animation_lines, animation_line_data):
+            line.set_data(theta, radius)
+        return animation_lines
+
+    animation_instance = animation.FuncAnimation(
+        animation_figure,
+        update_animation,
+        frames=itertools.count(),
+        interval=40,
+        init_func=initialize_animation,
+        blit=True,
+        cache_frame_data=False,
+    )
+    animation_canvas.draw()
+
+
+def refresh_animation():
+    global animation_lines, animation_line_data, animation_frame_offset
+    if animation_figure is None or animation_canvas is None:
+        return
+
+    animation_frame_offset = animation_frame
+    plt.figure(animation_figure.number)
+    gg.graphic()
+    axes = animation_figure.axes[0]
+    axes.set_axis_off()
+    animation_lines = tuple(axes.lines)
+    animation_line_data = tuple(
+        (line.get_xdata().copy(), line.get_ydata().copy())
+        for line in animation_lines
+    )
+    animation_canvas.draw_idle()
+
+
+def stop_animation():
+    global animation_figure, animation_canvas, animation_widget
+    global animation_instance
+    global animation_lines, animation_line_data
+
+    if animation_instance is not None:
+        animation_instance.event_source.stop()
+        animation_instance = None
+    if animation_widget is not None:
+        animation_widget.destroy()
+        animation_widget = None
+    if animation_figure is not None:
+        plt.close(animation_figure)
+        animation_figure = None
+    animation_canvas = None
+    animation_lines = ()
+    animation_line_data = ()
+
+
+def close_interface():
+    stop_animation()
+    plt.close("all")
+    root.destroy()
 
 
 # ===========================================================================
@@ -101,6 +182,7 @@ root = tk.Tk()
 root.title("齒輪計算工具")
 root.geometry('1000x600')
 root.resizable(False, False)
+root.protocol("WM_DELETE_WINDOW", close_interface)
 
 # 初始化變量
 first, second, confirm_y = 50, 200, 90
@@ -126,15 +208,6 @@ for btn in buttons:
 
 tk.Button(root, text="進階設定", command=toggle_buttons).place(x=second, y=120)
 
-# 添加齒輪草圖按鈕
-tk.Button(root, text="齒輪草圖", command=show_gear).place(x=600, y=10)
-tk.Button(root, text="齒輪草圖", command=show_gear).place(x=600, y=10)
-
-# 把動畫按鈕存成變數，方便控制
-btn_animation = tk.Button(root, text="動畫", command=show_animate)
-btn_animation.place(x=700, y=10)
-
-
 # 設置輸入框和標籤
 entry1_Label = tk.Label(root, text='輸入齒輪齒數:')
 entry1_Label.place(x=first, y=0)
@@ -155,5 +228,6 @@ show_data(1)
 
 # 顯示齒輪圖像
 show_gear()
+show_animate()
 
 root.mainloop()

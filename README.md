@@ -47,7 +47,7 @@ Transmission-system/
 - 壓力角
 - 齒根圓角倍率
 
-程式會將參數與導出結果寫入 `Gear_Designer/gear.xlsx`，並使用 Matplotlib 在 Tkinter 介面中顯示齒輪草圖與短時間旋轉動畫。
+程式會將參數與導出結果寫入 `Gear_Designer/gear.xlsx`，並使用 Matplotlib 在 Tkinter 介面中顯示齒輪草圖與持續循環的旋轉動畫；按下參數設定的「確定」後，草圖會自動更新。
 
 主要計算包含：
 

@@ -1,0 +1,12 @@
+[project]
+name = "gear-system-designer-python"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "cadquery-ocp-novtk==8.0.1.1.0; python_version < '3.15'",
+    "ezdxf>=1.4.5,<2",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+]
