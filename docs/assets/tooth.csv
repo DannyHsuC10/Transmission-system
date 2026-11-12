@@ -1,8 +1,8 @@
-name,value,註解,unit
-Ts,21,太陽齒數,
-Tr,102,內齒輪齒數,
-Tp1,57,行星齒齒數,
-Tp2,24,行星齒齒數,
-M,0.8,模數,mm
-n,3,行星齒輪數量,
-axle,10,軸徑,mm
+name,value,description,unit
+Ts,21,Sun gear tooth count,
+Tr,102,Ring gear tooth count,
+Tp1,57,First planet gear tooth count,
+Tp2,24,Second planet gear tooth count,
+M,0.8,Module,mm
+n,3,Number of planet gear sets,
+axle,10,Default bore diameter,mm
