@@ -92,7 +92,7 @@
             <label for="gear-role">選擇齒輪</label>
             <select id="gear-role">
               <option value="0">太陽輪</option><option value="1">第一行星輪</option>
-              <option value="2">第二行星輪</option><option value="3">內齒圈</option>
+              <option value="2">第二行星輪</option><option value="3">內齒輪 (內齒環)</option>
             </select>
           </div>
           <p class="shared-module">共用模數 <strong id="single-module"></strong></p>
@@ -126,7 +126,7 @@
           </form>
           <div class="formula-note">
             <strong>齒輪外廓</strong>
-            <span>包括行星輪齒頂掃掠範圍及齒圈齒根圓。齒圈外壁與箱體壁厚須另行預留。</span>
+            <span>包括行星輪的齒頂掃掠範圍及內齒環的齒根圓。內齒環外壁與箱體壁厚須另行預留。</span>
           </div>
         </section>
         <p class="design-status" id="design-status" role="status">正在載入齒輪參數…</p>
@@ -197,7 +197,7 @@
                 <caption class="sr-only">候選組合依齒比及外廓由小到大排列</caption>
                 <thead><tr>
                   <th scope="col">選取</th><th scope="col">太陽輪</th><th scope="col">行星輪 1</th><th scope="col">行星輪 2</th>
-                  <th scope="col">內齒圈</th><th scope="col">齒比 <var>z</var></th>
+                  <th scope="col">內齒輪 (內齒環)</th><th scope="col">齒比 <var>z</var></th>
                   <th scope="col">外廓 (mm)</th><th scope="col">幾何上限組數</th>
                 </tr></thead>
                 <tbody id="results-body"></tbody>
@@ -209,7 +209,7 @@
                 產生齒輪系 <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
               </button>
             </div>
-            <p class="table-note">齒圈固定、太陽輪輸入且行星架輸出時，減速比為 <strong>1 + <var>z</var></strong>。</p>
+            <p class="table-note">固定內齒輪 (內齒環)、以太陽輪輸入並由行星架輸出時，減速比為 <strong>1 + <var>z</var></strong>。</p>
           </div>
         </div>
       </section>

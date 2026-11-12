@@ -557,7 +557,7 @@ $("export-gear").addEventListener("click", async () => {
     ? `外徑須大於齒根圓直徑 ${Number(gear.geometry.root_diameter.toPrecision(10))} mm。`
     : "設定齒輪沿軸向拉伸的厚度。";
   const fields = [];
-  if (gear.internal) fields.push(["outerDiameter", "內齒圈外徑", "mm"]);
+  if (gear.internal) fields.push(["outerDiameter", `${gear.name}外徑`, "mm"]);
   if (format === "STEP") fields.push(["thickness", "齒輪厚度", "mm"]);
   cadInputs = fillFields($("cad-fields"), fields, {prefix: "cad"});
   setValues(cadInputs, {outerDiameter: Number((gear.geometry.root_diameter + 2 * design.M).toPrecision(12)), thickness: 5});

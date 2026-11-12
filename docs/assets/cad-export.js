@@ -2,9 +2,10 @@ import {numberInput, polar, profileSegments, segmentPoint, TAU} from "./gear-mod
 
 export function cadCircleRadius(gear, outerDiameter) {
   if (!gear.internal) return gear.bore / 2;
-  const diameter = numberInput(outerDiameter, "內齒圈外徑");
+  const diameterLabel = `${gear.name}外徑`;
+  const diameter = numberInput(outerDiameter, diameterLabel);
   if (diameter <= gear.geometry.root_diameter) {
-    throw new Error(`內齒圈外徑須大於齒根圓直徑 ${gear.geometry.root_diameter.toPrecision(8)} mm。`);
+    throw new Error(`${diameterLabel}須大於齒根圓直徑 ${gear.geometry.root_diameter.toPrecision(8)} mm。`);
   }
   return diameter / 2;
 }

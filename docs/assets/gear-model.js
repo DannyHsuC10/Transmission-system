@@ -1,11 +1,11 @@
 // Browser port of gear_system_designer.py and gear_search.py.
 export const TAU = 2 * Math.PI;
 export const RAD = Math.PI / 180;
-export const GEAR_NAMES = ["太陽輪", "第一行星輪", "第二行星輪", "內齒圈"];
+export const GEAR_NAMES = ["太陽輪", "第一行星輪", "第二行星輪", "內齒輪 (內齒環)"];
 export const TEETH_KEYS = ["Ts", "Tp1", "Tp2", "Tr"];
 export const SYSTEM_FIELDS = [
   ["Ts", "太陽輪齒數", "齒"], ["Tp1", "第一行星輪齒數", "齒"],
-  ["Tp2", "第二行星輪齒數", "齒"], ["Tr", "內齒圈齒數", "齒"],
+  ["Tp2", "第二行星輪齒數", "齒"], ["Tr", `${GEAR_NAMES[3]}齒數`, "齒"],
   ["M", "模數", "mm"], ["n", "行星輪組數", "組"], ["axle", "預設軸孔", "mm"],
 ];
 export const PROFILE_FIELDS = [
@@ -221,7 +221,7 @@ export function planetPhaseStep(sun, planet1, planet2, ring, count) {
 
 export function validateMeshPressureAngles(profiles) {
   for (const [first, second, label] of [
-    [0, 1, "太陽輪與第一行星輪"], [2, 3, "第二行星輪與內齒圈"],
+    [0, 1, "太陽輪與第一行星輪"], [2, 3, `第二行星輪與${GEAR_NAMES[3]}`],
   ]) {
     const a = profiles[first].pressure_angle, b = profiles[second].pressure_angle;
     if (Math.abs(a - b) > EPS * Math.max(Math.abs(a), Math.abs(b))) {
@@ -232,7 +232,7 @@ export function validateMeshPressureAngles(profiles) {
 
 export function meshProfileWarnings(profiles) {
   const warnings = [];
-  for (const [a, b, label] of [[0, 1, "太陽輪與第一行星輪"], [2, 3, "第二行星輪與內齒圈"]]) {
+  for (const [a, b, label] of [[0, 1, "太陽輪與第一行星輪"], [2, 3, `第二行星輪與${GEAR_NAMES[3]}`]]) {
     const first = profiles[a], second = profiles[b];
     if (first.space_ratio + second.space_ratio < 2 - EPS) {
       warnings.push(`${label}的節圓齒厚總和大於周節。`);
@@ -272,7 +272,7 @@ export function involuteAngle(radius, base) {
 export function validateGearProfile(g, internal) {
   const {pitch_radius: rp, base_radius: rb, tip_radius: rt, root_radius: rr} = g;
   if (internal && rt < rb) {
-    throw new Error("內齒輪齒頂圓半徑小於基圓半徑，無法產生有效漸開線。");
+    throw new Error(`${GEAR_NAMES[3]}的齒頂圓半徑小於基圓半徑，無法產生有效漸開線。`);
   }
   if (rr <= 0) throw new Error("齒根圓半徑須大於零，請調整齒數或齒根倍率。");
   const start = internal ? rt : Math.max(rr, rb);
@@ -282,7 +282,7 @@ export function validateGearProfile(g, internal) {
   if (internal) {
     const half = g.tooth_thickness / (2 * rp);
     if (half + atStart - atPitch <= 0 || half + atEnd - atPitch >= g.half_pitch_angle) {
-      throw new Error("內齒輪的齒面交疊，請調整齒間、齒頂或齒根倍率。");
+      throw new Error(`${GEAR_NAMES[3]}的齒面交疊，請調整齒間、齒頂或齒根倍率。`);
     }
   } else {
     const gap = g.tooth_space / rp - 2 * atPitch;

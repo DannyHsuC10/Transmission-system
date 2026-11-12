@@ -278,7 +278,7 @@ export function buildPlot(view, design, gears, role) {
   const boards = view === "overlay"
     ? [profileBoard("全組合（兩層軸向投影）", [...inner, ...outer])]
     : [profileBoard("第一層｜太陽輪與第一行星輪", outer),
-      profileBoard("第二層｜第二行星輪與內齒圈", inner)];
+      profileBoard(`第二層｜第二行星輪與${GEAR_NAMES[3]}`, inner)];
   return {boards, roles: [0, 1, 2, 3], warnings};
 }
 
