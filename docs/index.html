@@ -21,6 +21,8 @@
     <symbol id="icon-external" viewBox="0 0 24 24"><path d="M13 5h6v6m0-6-8 8m6 0v6H5V7h6"/></symbol>
     <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5"/></symbol>
     <symbol id="icon-rotate" viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 2.2 6M4 5v6h6"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M9 5v14m6-14v14"/></symbol>
   </svg>
   <a class="skip-link" href="#workspace">跳到設計工作區</a>
   <header class="topbar">
@@ -164,6 +166,29 @@
           </div>
           <p class="notice" id="plot-notice" role="status" hidden></p>
           <div id="plot-content">
+            <section class="motion-panel" id="assembly-animation" aria-label="固定行星架動畫" hidden>
+              <div class="motion-actions">
+                <button class="button primary" id="assembly-play" type="button" aria-controls="plot-grid">
+                  <svg class="icon" aria-hidden="true"><use id="assembly-play-icon" href="#icon-play"/></svg>
+                  <span id="assembly-play-text">播放動畫</span>
+                </button>
+                <button class="button quiet" id="assembly-reset" type="button" aria-controls="plot-grid">重設相位</button>
+                <label class="motion-input">
+                  太陽輪輸入
+                  <span class="input-shell">
+                    <input id="assembly-sun-rpm" type="number" step="any" value="12" required aria-describedby="assembly-direction assembly-speed-error">
+                    <span class="field-unit">rpm</span>
+                  </span>
+                </label>
+              </div>
+              <dl class="motion-speeds">
+                <div><dt>行星架</dt><dd>固定</dd></div>
+                <div><dt>兩級行星輪（同軸）</dt><dd><span id="assembly-planet-rpm">—</span> <small>rpm</small></dd></div>
+                <div><dt>內齒輪 (內齒環)輸出</dt><dd><span id="assembly-ring-rpm">—</span> <small>rpm</small></dd></div>
+              </dl>
+              <p class="motion-hint" id="assembly-direction">正值為逆時針，負值為順時針。圓點標示各齒輪的旋轉角度。</p>
+              <p class="motion-hint motion-error" id="assembly-speed-error" role="status" hidden>請輸入有效的太陽輪轉速。</p>
+            </section>
             <div class="plot-grid" id="plot-grid"></div>
             <div class="plot-footer">
               <ul class="legend" id="plot-legend" aria-label="齒輪圖例"></ul>
@@ -175,7 +200,7 @@
             </div>
             <dl class="single-stats" id="single-stats" hidden></dl>
             <details class="phase-info" id="phase-info" hidden>
-              <summary>嚙合相位與中心距</summary>
+              <summary>起始嚙合相位與中心距</summary>
               <dl class="phase-values" id="phase-values"></dl>
             </details>
           </div>
@@ -215,7 +240,7 @@
       </section>
     </div>
     <footer class="page-footer">
-      <span>齒形與相位用於靜態幾何預覽；齒根圓角半徑為參考值。</span>
+      <span>齒形與相位供幾何預覽，齒根圓角半徑為參考值。</span>
       <span>長度單位：mm</span>
     </footer>
   </main>

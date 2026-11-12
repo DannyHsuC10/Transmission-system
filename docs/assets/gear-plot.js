@@ -50,8 +50,9 @@ function addPitch(model, gear, x, y, dashed = false) {
   model.append(circle);
 }
 
-function addProfiles(model, defs, parts, uid, fill = false) {
+function addProfiles(model, defs, parts, uid, {fill = false, markerRadius = 0} = {}) {
   const ids = new Map();
+  const instances = [];
   for (const {gear, x = 0, y = 0, rotation = 0} of parts) {
     if (!ids.has(gear)) {
       const id = `${uid}-profile-${gear.role}`;
@@ -67,11 +68,27 @@ function addProfiles(model, defs, parts, uid, fill = false) {
         fill: fill && !gear.internal ? color : "none", "fill-opacity": 0.09,
         "fill-rule": "evenodd", "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke",
       }));
+      if (markerRadius > 0) {
+        const {root_radius: root, pitch_radius: pitch} = gear.geometry;
+        group.append(svg("circle", {
+          cx: (root + (gear.internal ? pitch : gear.bore / 2)) / 2,
+          cy: 0, r: Math.min(markerRadius, root * 0.065), fill: color,
+        }));
+      }
       defs.append(group);
       ids.set(gear, id);
     }
-    model.append(svg("use", {href: "#" + ids.get(gear), transform: `translate(${x} ${y}) rotate(${rotation / RAD})`}));
+    const center = `translate(${x} ${y})`;
+    const phase = rotation / RAD;
+    const node = svg("use", {href: "#" + ids.get(gear), transform: `${center} rotate(${phase})`});
+    model.append(node);
+    instances.push({node, center, phase, role: gear.role});
   }
+  return (offsets) => {
+    for (const {node, center, phase, role} of instances) {
+      node.setAttribute("transform", `${center} rotate(${phase + offsets[role]})`);
+    }
+  };
 }
 
 function niceStep(scale) {
@@ -113,7 +130,7 @@ function createBoard(title, extent, draw) {
   camera.append(model);
   viewport.append(camera);
   root.append(grid, viewport, gridFrame);
-  draw(model, defs, uid);
+  const rotateGears = draw(model, defs, uid);
   let zoom = 1, tx = 0, ty = 0, drag = null;
 
   function render() {
@@ -225,7 +242,7 @@ function createBoard(title, extent, draw) {
     observer.observe(root);
   }
   return {
-    root, title, setZoom, reset, observe, dispose: () => observer?.disconnect(), width: () => plotWidth,
+    root, title, setZoom, reset, observe, dispose: () => observer?.disconnect(), width: () => plotWidth, rotateGears,
     rotate: (degrees) => model.setAttribute("transform", `rotate(${degrees})`),
   };
 }
@@ -235,7 +252,7 @@ export function buildPlot(view, design, gears, role) {
     const gear = gears[role], g = gear.geometry;
     const title = `${GEAR_NAMES[role]}（${gear.teeth} 齒）`;
     const board = createBoard(title, Math.max(g.root_radius, g.tip_radius), (model, defs, uid) => {
-      addProfiles(model, defs, [{gear}], uid, true);
+      addProfiles(model, defs, [{gear}], uid, {fill: true});
       model.append(svg("circle", {
         r: g.pitch_radius, fill: "none", stroke: PLOT_COLORS[role], "stroke-opacity": 0.5,
         "stroke-dasharray": "5 4", "vector-effect": "non-scaling-stroke",
@@ -273,13 +290,13 @@ export function buildPlot(view, design, gears, role) {
   const outerExtent = Math.max(sun.geometry.tip_radius, orbit + first.geometry.tip_radius);
   const innerExtent = Math.max(ring.geometry.root_radius, orbit + second.geometry.tip_radius);
   const extent = Math.max(outerExtent, innerExtent);
-  const profileBoard = (title, parts) =>
-    createBoard(title, extent, (model, defs, uid) => addProfiles(model, defs, parts, uid));
+  const profileBoard = (title, parts, markerRadius) =>
+    createBoard(title, extent, (model, defs, uid) => addProfiles(model, defs, parts, uid, {markerRadius}));
   const boards = view === "overlay"
-    ? [profileBoard("全組合（兩層軸向投影）", [...inner, ...outer])]
+    ? [profileBoard("全組合（兩層軸向投影）", [...inner, ...outer], extent * 0.013)]
     : [profileBoard("第一層｜太陽輪與第一行星輪", outer),
       profileBoard(`第二層｜第二行星輪與${GEAR_NAMES[3]}`, inner)];
-  return {boards, roles: [0, 1, 2, 3], warnings};
+  return {boards, roles: [0, 1, 2, 3], warnings, phases};
 }
 
 export function drawingSvg(boards, roles = []) {

@@ -114,7 +114,7 @@ h1, h2, p, dl, dd { margin: 0; }
   margin-inline-start: 4px; color: var(--soft); font-size: .72rem; font-weight: 450;
 }
 .input-shell { position: relative; min-width: 0; }
-.field input, select {
+.field input, .motion-input input, select {
   width: 100%; height: 35px; padding: 6px 9px; border-radius: 7px;
   border: 1px solid #cbd6e3; background: #fcfdff; font-size: .82rem;
 }
@@ -180,6 +180,27 @@ h1, h2, p, dl, dd { margin: 0; }
   border-radius: 7px; color: #6d470e; font-size: .81rem; line-height: 1.5; white-space: pre-line;
 }
 .notice.error { color: #942d23; background: #fff5f3; border-color: #efcbc5; }
+.motion-panel {
+  display: grid; gap: 8px; margin: 0 16px 10px; padding: 9px 11px;
+  border: 1px solid var(--line); border-radius: 9px; background: #f6f8fc;
+}
+.motion-actions, .motion-input, .motion-speeds, .motion-speeds > div {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 9px;
+}
+.motion-input { font-size: .81rem; font-weight: 650; }
+.motion-input input {
+  width: 100px; padding-inline-end: 35px; text-align: end; font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+.motion-input input::-webkit-inner-spin-button { appearance: none; }
+.motion-input input[aria-invalid="true"] { border-color: #a13429; }
+.motion-speeds { gap: 4px 14px; font-size: .78rem; }
+.motion-speeds > div { gap: 4px; }
+.motion-speeds dt, .motion-speeds small, .motion-hint { color: var(--muted); }
+.motion-speeds dd { font-weight: 650; font-variant-numeric: tabular-nums; }
+.motion-speeds small { font-size: .7rem; font-weight: 450; }
+.motion-hint { font-size: .72rem; line-height: 1.4; }
+.motion-error { color: #a13429; }
 .plot-grid { display: grid; gap: 10px; margin-inline: 16px; }
 .plot-grid.split { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .plot-board { margin: 0; min-width: 0; background: #f7f9fc; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
@@ -269,7 +290,7 @@ dialog .notice { margin: 12px 0 0; }
   .metric { padding: 8px 11px 10px; }
   .workspace { grid-template-columns: minmax(0, 1fr); }
   .preview-head { flex-wrap: wrap; padding-inline: 12px; }
-  .plot-grid, .table-wrap, .empty-state, .result-actions, .table-note, .notice { margin-inline: 12px; }
+  .plot-grid, .table-wrap, .empty-state, .result-actions, .table-note, .notice, .motion-panel { margin-inline: 12px; }
   .plot-footer { padding-inline: 12px; }
   .settings-panel { padding-inline: 13px; }
   .field { grid-template-columns: minmax(0, 1fr) minmax(110px, 43%); }

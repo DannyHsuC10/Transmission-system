@@ -179,6 +179,13 @@ export function gearRatio({Ts, Tp1, Tp2, Tr}) {
   return (Tp1 * Tr) / (Ts * Tp2);
 }
 
+export function fixedCarrierSpeedRatios(design) {
+  // External mesh reverses direction. The two planet wheels share a shaft,
+  // and the internal mesh keeps the direction of that shaft.
+  const planet = -design.Ts / design.Tp1;
+  return [1, planet, planet, -1 / gearRatio(design)];
+}
+
 export function gearEnvelope(gears) {
   const [sun, first, second, ring] = gears.map((gear) => gear.geometry);
   return Math.max(

@@ -1,6 +1,6 @@
 import {
-  centerDistances, defaultDesign, GEAR_NAMES, gearEnvelope, gearRatio, GEOMETRY_ROWS,
-  makeGears, meshPhases, PROFILE_FIELDS, RAD, readGearCsv, readProfileValues,
+  centerDistances, defaultDesign, fixedCarrierSpeedRatios, GEAR_NAMES, gearEnvelope, gearRatio, GEOMETRY_ROWS,
+  makeGears, PROFILE_FIELDS, RAD, readGearCsv, readProfileValues,
   readSearchValues, readSystemValues, readTeeth, SYSTEM_FIELDS, TEETH_KEYS,
 } from "./gear-model.js";
 import {buildPlot, drawingPng, drawingSvg, PLOT_COLORS} from "./gear-plot.js";
@@ -11,6 +11,7 @@ let design = defaults, gears = makeGears(defaults);
 let mode = "system", view = "layout", role = 0;
 let profileDrafts = defaults.profiles.map((profile) => ({...profile}));
 let boards = [], plotRoles = [], rotation = null;
+let assemblyMotion = null;
 let searchWorker = null, candidates = [], selectedCandidate = null;
 let cadWorker = null, cadRequest = null;
 
@@ -259,6 +260,9 @@ function renderDetails(gear) {
 
 function renderView() {
   stopRotation();
+  pauseAssembly();
+  assemblyMotion = null;
+  $("assembly-animation").hidden = true;
   boards.forEach((board) => board.dispose());
   boards = [];
   plotRoles = [];
@@ -312,14 +316,26 @@ function renderView() {
       $("single-stats").hidden = false;
       $("rotate-gear").hidden = false;
     }
-    if (view === "assembly" || view === "overlay") {
+    if (plot.phases) {
       const [external, internal] = centerDistances(design);
-      const {phases} = meshPhases(design, gears);
       descriptionList($("phase-values"), [
         ["外嚙合中心距", `${external.toFixed(6)} mm`], ["內嚙合中心距", `${internal.toFixed(6)} mm`],
-        ...phases.map((phase, index) => [GEAR_NAMES[index] + "相位", `${(phase / RAD).toFixed(6)}°`]),
+        ...plot.phases.map((phase, index) => [GEAR_NAMES[index] + "相位", `${(phase / RAD).toFixed(6)}°`]),
       ]);
       $("phase-info").hidden = false;
+    }
+    if (view === "overlay") {
+      assemblyMotion = {
+        rotate: boards[0].rotateGears,
+        ratios: fixedCarrierSpeedRatios(design),
+        // This many input turns brings all shafts back to their starting angles.
+        cycleTurns: design.Tp1 * design.Tr,
+        inputTurns: 0,
+        frameId: null,
+        previousFrame: null,
+      };
+      updateAssemblySpeed();
+      $("assembly-animation").hidden = false;
     }
   } catch (error) {
     notice(error.message, true);
@@ -352,6 +368,65 @@ $("rotate-gear").addEventListener("click", () => {
     rotation = requestAnimationFrame(frame);
   };
   rotation = requestAnimationFrame(frame);
+});
+
+function showAssemblyPlaying(playing) {
+  $("assembly-play-text").textContent = playing ? "暫停動畫" : "播放動畫";
+  $("assembly-play-icon").setAttribute("href", playing ? "#icon-pause" : "#icon-play");
+}
+
+function pauseAssembly() {
+  if (!assemblyMotion || assemblyMotion.frameId === null) return;
+  cancelAnimationFrame(assemblyMotion.frameId);
+  assemblyMotion.frameId = null;
+  assemblyMotion.previousFrame = null;
+  showAssemblyPlaying(false);
+}
+
+function updateAssemblySpeed() {
+  if (!assemblyMotion) return;
+  const input = $("assembly-sun-rpm");
+  const rpm = input.valueAsNumber;
+  const rates = assemblyMotion.ratios.map((ratio) => ratio * rpm);
+  const valid = rates.every(Number.isFinite);
+  assemblyMotion.inputRpm = valid ? rpm : 0;
+  $("assembly-planet-rpm").textContent = valid ? Number(rates[1].toPrecision(5)) : "—";
+  $("assembly-ring-rpm").textContent = valid ? Number(rates[3].toPrecision(5)) : "—";
+  $("assembly-speed-error").hidden = valid;
+  input.setAttribute("aria-invalid", String(!valid));
+  $("assembly-play").disabled = !assemblyMotion.inputRpm;
+  if (!assemblyMotion.inputRpm) pauseAssembly();
+}
+
+$("assembly-sun-rpm").addEventListener("input", updateAssemblySpeed);
+$("assembly-play").addEventListener("click", () => {
+  const motion = assemblyMotion;
+  if (!motion || !motion.inputRpm) return;
+  if (motion.frameId !== null) {
+    pauseAssembly();
+    return;
+  }
+  showAssemblyPlaying(true);
+  const frame = (now) => {
+    if (motion.previousFrame !== null) {
+      // Limit the jump if rendering stalls.
+      const elapsedMinutes = Math.min(now - motion.previousFrame, 250) / 60_000;
+      motion.inputTurns = (motion.inputTurns + motion.inputRpm * elapsedMinutes) % motion.cycleTurns;
+      motion.rotate(motion.ratios.map((ratio) => ((motion.inputTurns * ratio) % 1) * 360));
+    }
+    motion.previousFrame = now;
+    motion.frameId = requestAnimationFrame(frame);
+  };
+  motion.frameId = requestAnimationFrame(frame);
+});
+$("assembly-reset").addEventListener("click", () => {
+  if (!assemblyMotion) return;
+  pauseAssembly();
+  assemblyMotion.inputTurns = 0;
+  assemblyMotion.rotate([0, 0, 0, 0]);
+});
+document.addEventListener("visibilitychange", () => {
+  if (assemblyMotion) assemblyMotion.previousFrame = null;
 });
 
 $("zoom-in").addEventListener("click", () => boards.forEach((board) => board.setZoom(1.25)));

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {
-  centerDistances, defaultDesign, findGearCombinations, gearEnvelope, makeGears, meshPhases,
+  centerDistances, defaultDesign, findGearCombinations, fixedCarrierSpeedRatios, gearEnvelope, makeGears, meshPhases,
   planetPhaseStep, profileSegments, readGearCsv, readProfileValues, segmentPoint, TAU,
 } from "../docs/assets/gear-model.js";
 import {cadCircleRadius, writeStep} from "../docs/assets/cad-export.js";
@@ -61,6 +61,17 @@ test("invalid assemblies report center distance, pressure angle and shared phase
     for (const phase of [52 * i * step / TAU - 20 * i / 3, 34 * i * step / TAU + 106 * i / 3]) {
       near(phase, Math.round(phase));
     }
+  }
+});
+
+test("fixed carrier speeds synchronize both planet stages and satisfy both meshes", () => {
+  for (const design of [defaults, {...defaults, Ts: 24, Tp1: 51, Tp2: 27, Tr: 102}]) {
+    const [sun, first, second, ring] = fixedCarrierSpeedRatios(design);
+    assert.equal(sun, 1);
+    assert.equal(first, second);
+    assert.ok(first < 0 && ring < 0);
+    near(sun * design.Ts + first * design.Tp1, 0);
+    near(second * design.Tp2 - ring * design.Tr, 0);
   }
 });
 
