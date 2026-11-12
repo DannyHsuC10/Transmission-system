@@ -6,6 +6,7 @@ const LEFT = 46, TOP = 15, RIGHT = 15, PLOT_HEIGHT = 431;
 const FONT = '"Segoe UI", "Microsoft JhengHei UI", sans-serif';
 export const PLOT_COLORS = ["#255889", "#bc4435", "#99610a", "#147c68"];
 const labelColor = "#475569";
+const plotSurface = "#eff4f8";
 const shapeCache = new WeakMap();
 let plotCount = 0;
 
@@ -119,9 +120,9 @@ function createBoard(title, extent, draw) {
   const clipRect = svg("rect", rect);
   clip.append(clipRect);
   defs.append(clip);
-  const backdrop = svg("rect", {width: W, height: H, fill: "#f1f5f9"});
+  const backdrop = svg("rect", {width: W, height: H, fill: plotSurface});
   const gridFill = svg("rect", {...rect, fill: "#ffffff"});
-  const gridFrame = svg("rect", {...rect, fill: "none", stroke: "#dbe2ea"});
+  const gridFrame = svg("rect", {...rect, fill: "none", stroke: "#d4dfe9"});
   root.append(defs, backdrop, gridFill);
   const grid = svg("g", {"aria-hidden": "true"});
   const viewport = svg("g", {"clip-path": `url(#${uid}-frame)`});
@@ -303,7 +304,7 @@ export function drawingSvg(boards, roles = []) {
   const titleHeight = 33, legendHeight = roles.length ? 31 : 0;
   const width = boards.reduce((sum, board) => sum + board.width(), 0), height = H + titleHeight + legendHeight;
   const drawing = svg("svg", {width, height, viewBox: `0 0 ${width} ${height}`});
-  drawing.append(svg("rect", {width, height, fill: "#f1f5f9"}));
+  drawing.append(svg("rect", {width, height, fill: plotSurface}));
   let offset = 0;
   for (const {root, title, width: plotWidth} of boards) {
     const plot = root.cloneNode(true);
@@ -313,7 +314,7 @@ export function drawingSvg(boards, roles = []) {
     plot.removeAttribute("tabindex");
     drawing.append(svg("text", {
       x: offset + LEFT, y: 23, "font-family": FONT, "font-size": 16,
-      "font-weight": 700, fill: "#0f172a",
+      "font-weight": 700, fill: "#142638",
     }, title), plot);
     offset += plotWidth();
   }

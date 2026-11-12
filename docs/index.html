@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="在瀏覽器中配置複合行星齒輪系、預覽漸開線齒形、搜尋齒數組合，並匯出 DXF 和 STEP。">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#111d31">
   <title>Gear System Designer｜複合行星齒輪設計</title>
   <link rel="icon" href="./assets/gear.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./assets/styles.css">
@@ -27,26 +27,22 @@
   <a class="skip-link" href="#workspace">跳到設計工作區</a>
   <header class="topbar">
     <div class="topbar-inner">
+      <img class="brand-icon" src="./assets/gear.svg" width="48" height="48" alt="">
       <div class="brand">
-        <img src="./assets/gear.svg" width="38" height="38" alt="">
-        <div><strong>Gear System Designer</strong><span>TRANSMISSION SYSTEM</span></div>
+        <p class="brand-name">Gear System Designer</p>
+        <h1>複合行星齒輪設計</h1>
+        <p class="brand-description">配置齒輪系、檢查兩層嚙合、搜尋合適的齒數組合。</p>
       </div>
-      <a class="repo-link" href="https://github.com/DannyHsuC10/Transmission-system">
-        GitHub <svg class="icon" aria-hidden="true"><use href="#icon-external"/></svg>
-      </a>
+      <div class="topbar-actions">
+        <span class="local-badge">瀏覽器內計算</span>
+        <a class="repo-link" href="https://github.com/DannyHsuC10/Transmission-system">
+          GitHub <svg class="icon" aria-hidden="true"><use href="#icon-external"/></svg>
+        </a>
+      </div>
     </div>
   </header>
 
   <main class="page" id="workspace">
-    <div class="intro">
-      <div>
-        <p class="eyebrow"><span class="eyebrow-mark"></span> 齒輪設計工作台</p>
-        <h1>複合行星齒輪設計</h1>
-        <p>配置齒輪系、檢查兩層嚙合、搜尋合適的齒數組合。</p>
-      </div>
-      <span class="local-badge"><span></span> 瀏覽器內計算</span>
-    </div>
-
     <dl class="metrics" aria-label="已套用的齒輪系摘要">
       <div class="metric"><dt>共用模數</dt><dd><span id="metric-module">—</span><small>mm</small></dd></div>
       <div class="metric"><dt>行星輪組數</dt><dd><span id="metric-planets">—</span><small>組</small></dd></div>
