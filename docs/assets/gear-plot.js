@@ -3,9 +3,9 @@ import {GEAR_NAMES, meshPhases, planetCenters, profileSegments, RAD, segmentPoin
 const NS = "http://www.w3.org/2000/svg";
 const W = 560, H = 490;
 const LEFT = 46, TOP = 15, RIGHT = 15, PLOT_HEIGHT = 431;
-const FONT = "system-ui, sans-serif";
-export const PLOT_COLORS = ["#255dce", "#bc4435", "#99610a", "#147c68"];
-const labelColor = "#4f6073";
+const FONT = '"Segoe UI", "Microsoft JhengHei UI", sans-serif';
+export const PLOT_COLORS = ["#255889", "#bc4435", "#99610a", "#147c68"];
+const labelColor = "#475569";
 const shapeCache = new WeakMap();
 let plotCount = 0;
 
@@ -119,9 +119,9 @@ function createBoard(title, extent, draw) {
   const clipRect = svg("rect", rect);
   clip.append(clipRect);
   defs.append(clip);
-  const backdrop = svg("rect", {width: W, height: H, fill: "#f7f9fc"});
-  const gridFill = svg("rect", {...rect, fill: "#fbfdff"});
-  const gridFrame = svg("rect", {...rect, fill: "none", stroke: "#dce4ed"});
+  const backdrop = svg("rect", {width: W, height: H, fill: "#f1f5f9"});
+  const gridFill = svg("rect", {...rect, fill: "#ffffff"});
+  const gridFrame = svg("rect", {...rect, fill: "none", stroke: "#dbe2ea"});
   root.append(defs, backdrop, gridFill);
   const grid = svg("g", {"aria-hidden": "true"});
   const viewport = svg("g", {"clip-path": `url(#${uid}-frame)`});
@@ -303,7 +303,7 @@ export function drawingSvg(boards, roles = []) {
   const titleHeight = 33, legendHeight = roles.length ? 31 : 0;
   const width = boards.reduce((sum, board) => sum + board.width(), 0), height = H + titleHeight + legendHeight;
   const drawing = svg("svg", {width, height, viewBox: `0 0 ${width} ${height}`});
-  drawing.append(svg("rect", {width, height, fill: "#f7f9fc"}));
+  drawing.append(svg("rect", {width, height, fill: "#f1f5f9"}));
   let offset = 0;
   for (const {root, title, width: plotWidth} of boards) {
     const plot = root.cloneNode(true);
@@ -313,7 +313,7 @@ export function drawingSvg(boards, roles = []) {
     plot.removeAttribute("tabindex");
     drawing.append(svg("text", {
       x: offset + LEFT, y: 23, "font-family": FONT, "font-size": 16,
-      "font-weight": 700, fill: "#122338",
+      "font-weight": 700, fill: "#0f172a",
     }, title), plot);
     offset += plotWidth();
   }
