@@ -204,3 +204,7 @@ load_data('tooth')
 - [Python 齒輪設計與視覺化工具](Gear_Designer/Gear_Design_Interface.md)
 - [行星齒輪系幾何生成與組合視覺化程式說明](Gear_system_Designer/gear_sys.md)
 - [齒輪傳動計算表說明](Gear_Transmission_Sheet.md)
+
+## 授權
+
+本專案採用 [MIT License](LICENSE)。
