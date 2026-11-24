@@ -251,7 +251,7 @@ function createBoard(title, extent, draw) {
 export function buildPlot(view, design, gears, role) {
   if (view === "single") {
     const gear = gears[role], g = gear.geometry;
-    const title = `${GEAR_NAMES[role]}（${gear.teeth} 齒）`;
+    const title = `${GEAR_NAMES[role]} (${gear.teeth} teeth)`;
     const board = createBoard(title, Math.max(g.root_radius, g.tip_radius), (model, defs, uid) => {
       addProfiles(model, defs, [{gear}], uid, {fill: true});
       model.append(svg("circle", {
@@ -266,7 +266,7 @@ export function buildPlot(view, design, gears, role) {
   const [sun, first, second, ring] = gears;
   if (view === "layout") {
     const extent = Math.max(ring.geometry.pitch_radius, orbit + Math.max(first.geometry.pitch_radius, second.geometry.pitch_radius));
-    const board = createBoard("行星齒輪系節圓配置圖", extent, (model) => {
+    const board = createBoard("Planetary gear pitch circle layout", extent, (model) => {
       model.append(svg("circle", {
         r: orbit, fill: "none", stroke: "#8e9db1", "stroke-dasharray": "3 5", "vector-effect": "non-scaling-stroke",
       }));
@@ -294,9 +294,9 @@ export function buildPlot(view, design, gears, role) {
   const profileBoard = (title, parts, markerRadius) =>
     createBoard(title, extent, (model, defs, uid) => addProfiles(model, defs, parts, uid, {markerRadius}));
   const boards = view === "overlay"
-    ? [profileBoard("全組合（兩層軸向投影）", [...inner, ...outer], extent * 0.013)]
-    : [profileBoard("第一層｜太陽輪與第一行星輪", outer),
-      profileBoard(`第二層｜第二行星輪與${GEAR_NAMES[3]}`, inner)];
+    ? [profileBoard("Full assembly (both stages projected along the axis)", [...inner, ...outer], extent * 0.013)]
+    : [profileBoard("Stage 1: Sun gear and planet gear 1", outer),
+      profileBoard("Stage 2: Planet gear 2 and ring gear", inner)];
   return {boards, roles: [0, 1, 2, 3], warnings, phases};
 }
 
@@ -339,7 +339,7 @@ export async function drawingPng(drawing) {
     canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
     return await new Promise((resolve, reject) => canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("無法產生 PNG 圖片。"));
+      else reject(new Error("The PNG image could not be generated."));
     }, "image/png"));
   } finally {
     URL.revokeObjectURL(url);

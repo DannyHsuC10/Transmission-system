@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="在瀏覽器中配置複合行星齒輪系、預覽漸開線齒形、搜尋齒數組合，並匯出 DXF 和 STEP。">
+  <meta name="description" content="Configure compound planetary gear systems, preview involute tooth profiles, search tooth-count combinations, and export DXF and STEP files in your browser.">
   <meta name="theme-color" content="#111d31">
-  <title>Gear System Designer｜複合行星齒輪設計</title>
+  <title>Gear System Designer | Compound Planetary Gears</title>
   <link rel="icon" href="./assets/gear.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./assets/styles.css">
   <script type="module" src="./assets/app.js"></script>
@@ -24,17 +24,17 @@
     <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
     <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M9 5v14m6-14v14"/></symbol>
   </svg>
-  <a class="skip-link" href="#workspace">跳到設計工作區</a>
+  <a class="skip-link" href="#workspace">Skip to the design workspace</a>
   <header class="topbar">
     <div class="topbar-inner">
       <img class="brand-icon" src="./assets/gear.svg" width="48" height="48" alt="">
       <div class="brand">
         <p class="brand-name">Gear System Designer</p>
-        <h1>複合行星齒輪設計</h1>
-        <p class="brand-description">配置齒輪系、檢查兩層嚙合、搜尋合適的齒數組合。</p>
+        <h1>Compound Planetary Gear Design</h1>
+        <p class="brand-description">Configure the gear system, inspect both mesh stages, and find suitable tooth counts.</p>
       </div>
       <div class="topbar-actions">
-        <span class="local-badge">瀏覽器內計算</span>
+        <span class="local-badge">Runs in your browser</span>
         <a class="repo-link" href="https://github.com/DannyHsuC10/Transmission-system">
           GitHub <svg class="icon" aria-hidden="true"><use href="#icon-external"/></svg>
         </a>
@@ -43,134 +43,134 @@
   </header>
 
   <main class="page" id="workspace">
-    <dl class="metrics" aria-label="已套用的齒輪系摘要">
-      <div class="metric"><dt>共用模數</dt><dd><span id="metric-module">—</span><small>mm</small></dd></div>
-      <div class="metric"><dt>行星輪組數</dt><dd><span id="metric-planets">—</span><small>組</small></dd></div>
-      <div class="metric"><dt>齒比 <var>z</var><span class="metric-note">行星架固定</span></dt><dd id="metric-ratio">—</dd></div>
-      <div class="metric"><dt>齒輪最大外廓</dt><dd><span id="metric-diameter">—</span><small>mm</small></dd></div>
+    <dl class="metrics" aria-label="Applied gear system summary">
+      <div class="metric"><dt>Shared module</dt><dd><span id="metric-module">—</span><small>mm</small></dd></div>
+      <div class="metric"><dt>Planet sets</dt><dd><span id="metric-planets">—</span></dd></div>
+      <div class="metric"><dt>Gear ratio <var>z</var><span class="metric-note">Fixed carrier</span></dt><dd id="metric-ratio">—</dd></div>
+      <div class="metric"><dt>Gear envelope diameter</dt><dd><span id="metric-diameter">—</span><small>mm</small></dd></div>
     </dl>
 
-    <noscript><p class="notice error">請啟用 JavaScript 後使用 Gear System Designer。</p></noscript>
+    <noscript><p class="notice error">Enable JavaScript to use Gear System Designer.</p></noscript>
     <div class="workspace" id="designer">
-      <aside class="card settings" aria-label="設計參數">
-        <div class="mode-tabs" role="tablist" aria-label="設計模式">
-          <button type="button" id="mode-system" role="tab" aria-selected="true" aria-controls="system-panel" data-mode="system">齒輪系</button>
-          <button type="button" id="mode-single" role="tab" aria-selected="false" aria-controls="single-panel" data-mode="single" tabindex="-1">單顆設計</button>
-          <button type="button" id="mode-search" role="tab" aria-selected="false" aria-controls="search-panel" data-mode="search" tabindex="-1">尋找組合</button>
+      <aside class="card settings" aria-label="Design settings">
+        <div class="mode-tabs" role="tablist" aria-label="Design mode">
+          <button type="button" id="mode-system" role="tab" aria-selected="true" aria-controls="system-panel" data-mode="system">Gear System</button>
+          <button type="button" id="mode-single" role="tab" aria-selected="false" aria-controls="single-panel" data-mode="single" tabindex="-1">Single Gear</button>
+          <button type="button" id="mode-search" role="tab" aria-selected="false" aria-controls="search-panel" data-mode="search" tabindex="-1">Find Combinations</button>
         </div>
 
         <section class="settings-panel" id="system-panel" role="tabpanel" aria-labelledby="mode-system">
-          <h2>齒輪系參數</h2>
-          <p class="panel-description">設定齒數、模數與行星配置。</p>
+          <h2>Gear System Parameters</h2>
+          <p class="panel-description">Set tooth counts, the module, and the planet arrangement.</p>
           <form id="system-form" novalidate>
             <div class="field-list" id="system-fields"></div>
             <div class="form-actions">
-              <button class="button primary" type="submit">更新圖形 <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
-              <button class="button quiet" type="button" id="reset-design">還原預設</button>
+              <button class="button primary" type="submit">Update Preview <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+              <button class="button quiet" type="button" id="reset-design">Reset Defaults</button>
             </div>
           </form>
           <div class="formula-note">
-            <strong>兩層嚙合中心距相同</strong>
+            <strong>Both meshes share the same center distance</strong>
             <code>Tr = Ts + Tp1 + Tp2</code>
             <span id="center-distances"></span>
           </div>
           <div class="csv-row">
             <button class="button text-button" type="button" id="import-csv">
-              <svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg> 匯入參數 CSV
+              <svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg> Import CSV
             </button>
-            <a href="./assets/tooth.csv" download="tooth.csv">下載範例</a>
+            <a href="./assets/tooth.csv" download="tooth.csv">Download sample</a>
             <input type="file" accept=".csv,text/csv" id="csv-file" hidden>
           </div>
         </section>
 
         <section class="settings-panel" id="single-panel" role="tabpanel" aria-labelledby="mode-single" hidden>
-          <h2>單顆齒輪參數</h2>
-          <p class="panel-description">每種齒輪可分別設定齒形。</p>
+          <h2>Single Gear Parameters</h2>
+          <p class="panel-description">Set the tooth profile for each gear independently.</p>
           <div class="select-row">
-            <label for="gear-role">選擇齒輪</label>
+            <label for="gear-role">Select gear</label>
             <select id="gear-role">
-              <option value="0">太陽輪</option><option value="1">第一行星輪</option>
-              <option value="2">第二行星輪</option><option value="3">內齒輪 (內齒環)</option>
+              <option value="0">Sun Gear</option><option value="1">Planet Gear 1</option>
+              <option value="2">Planet Gear 2</option><option value="3">Ring Gear</option>
             </select>
           </div>
-          <p class="shared-module">共用模數 <strong id="single-module"></strong></p>
+          <p class="shared-module">Shared module <strong id="single-module"></strong></p>
           <form id="profile-form" novalidate>
             <div class="field-list" id="profile-fields"></div>
-            <p class="field-hint" id="bore-hint">軸孔留白沿用預設，輸入 0 為實心。</p>
+            <p class="field-hint" id="bore-hint">Leave the bore diameter blank to use the default, or enter 0 for a solid gear.</p>
             <div class="form-actions">
-              <button class="button primary" type="submit">套用到齒輪系 <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+              <button class="button primary" type="submit">Apply to Gear System <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
             </div>
           </form>
           <div class="export-row">
-            <select id="gear-format" aria-label="齒輪匯出格式">
+            <select id="gear-format" aria-label="Gear export format">
               <option>PNG</option><option>SVG</option><option>DXF</option><option>STEP</option>
             </select>
             <button class="button quiet" type="button" id="export-gear">
-              <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> 匯出齒輪
+              <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> Export Gear
             </button>
           </div>
         </section>
 
         <section class="settings-panel" id="search-panel" role="tabpanel" aria-labelledby="mode-search" hidden>
-          <h2>組合搜尋條件</h2>
-          <p class="panel-description">沿用目前已套用的齒形及軸孔。</p>
+          <h2>Search Criteria</h2>
+          <p class="panel-description">Uses the current tooth profiles and bore diameters.</p>
           <form id="search-form" novalidate>
             <div class="field-list" id="search-fields"></div>
             <div class="form-actions">
               <button class="button primary" type="submit" id="run-search">
-                <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg> 搜尋組合
+                <svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg> Search Combinations
               </button>
             </div>
           </form>
           <div class="formula-note">
-            <strong>齒輪外廓</strong>
-            <span>包括行星輪的齒頂掃掠範圍及內齒環的齒根圓。內齒環外壁與箱體壁厚須另行預留。</span>
+            <strong>Gear envelope</strong>
+            <span>Includes the planet gear tip sweep and the ring gear root circle. Allow additional space for the ring gear rim and housing walls.</span>
           </div>
         </section>
-        <p class="design-status" id="design-status" role="status">正在載入齒輪參數…</p>
+        <p class="design-status" id="design-status" role="status">Loading gear parameters…</p>
       </aside>
 
-      <section class="card preview" aria-label="設計結果">
-        <div class="view-tabs" role="tablist" aria-label="結果視圖">
-          <button type="button" id="tab-layout" role="tab" aria-selected="true" aria-controls="view-panel" data-view="layout">節圓配置</button>
-          <button type="button" id="tab-assembly" role="tab" aria-selected="false" aria-controls="view-panel" data-view="assembly" tabindex="-1">齒輪系組合</button>
-          <button type="button" id="tab-overlay" role="tab" aria-selected="false" aria-controls="view-panel" data-view="overlay" tabindex="-1">全組合</button>
-          <button type="button" id="tab-single" role="tab" aria-selected="false" aria-controls="view-panel" data-view="single" tabindex="-1" hidden>單顆預覽</button>
-          <button type="button" id="tab-details" role="tab" aria-selected="false" aria-controls="view-panel" data-view="details" tabindex="-1" hidden>詳細參數</button>
-          <button type="button" id="tab-results" role="tab" aria-selected="false" aria-controls="view-panel" data-view="results" tabindex="-1" hidden>搜尋結果</button>
+      <section class="card preview" aria-label="Design results">
+        <div class="view-tabs" role="tablist" aria-label="Result views">
+          <button type="button" id="tab-layout" role="tab" aria-selected="true" aria-controls="view-panel" data-view="layout">Pitch Circles</button>
+          <button type="button" id="tab-assembly" role="tab" aria-selected="false" aria-controls="view-panel" data-view="assembly" tabindex="-1">Assembly</button>
+          <button type="button" id="tab-overlay" role="tab" aria-selected="false" aria-controls="view-panel" data-view="overlay" tabindex="-1">Full Assembly</button>
+          <button type="button" id="tab-single" role="tab" aria-selected="false" aria-controls="view-panel" data-view="single" tabindex="-1" hidden>Gear Preview</button>
+          <button type="button" id="tab-details" role="tab" aria-selected="false" aria-controls="view-panel" data-view="details" tabindex="-1" hidden>Details</button>
+          <button type="button" id="tab-results" role="tab" aria-selected="false" aria-controls="view-panel" data-view="results" tabindex="-1" hidden>Search Results</button>
         </div>
         <div id="view-panel" role="tabpanel" aria-labelledby="tab-layout">
           <div class="preview-head">
             <div>
-              <h2 id="view-title">行星齒輪系節圓配置</h2>
-              <p id="view-description">兩級行星輪共用中心，沿行星架等角分布。</p>
+              <h2 id="view-title">Planetary Gear Pitch Circle Layout</h2>
+              <p id="view-description">The two planet gears in each set share an axis, and the sets are evenly spaced around the carrier.</p>
             </div>
-            <div class="plot-toolbar" id="plot-toolbar" role="group" aria-label="圖形工具">
-              <button class="tool" id="zoom-out" type="button" aria-label="縮小" title="縮小">
+            <div class="plot-toolbar" id="plot-toolbar" role="group" aria-label="Plot tools">
+              <button class="tool" id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out">
                 <svg class="icon" aria-hidden="true"><use href="#icon-minus"/></svg>
               </button>
-              <button class="tool" id="zoom-in" type="button" aria-label="放大" title="放大">
+              <button class="tool" id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in">
                 <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>
               </button>
-              <button class="tool" id="zoom-reset" type="button" aria-label="恢復視圖" title="恢復視圖">
+              <button class="tool" id="zoom-reset" type="button" aria-label="Reset view" title="Reset view">
                 <svg class="icon" aria-hidden="true"><use href="#icon-fit"/></svg>
               </button>
-              <button class="tool save-plot" id="save-plot" type="button" aria-label="下載圖形 PNG" title="下載圖形 PNG">
+              <button class="tool save-plot" id="save-plot" type="button" aria-label="Download plot as PNG" title="Download plot as PNG">
                 <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg>
               </button>
             </div>
           </div>
           <p class="notice" id="plot-notice" role="status" hidden></p>
           <div id="plot-content">
-            <section class="motion-panel" id="assembly-animation" aria-label="固定行星架動畫" hidden>
+            <section class="motion-panel" id="assembly-animation" aria-label="Fixed-carrier animation" hidden>
               <div class="motion-actions">
                 <button class="button primary" id="assembly-play" type="button" aria-controls="plot-grid">
                   <svg class="icon" aria-hidden="true"><use id="assembly-play-icon" href="#icon-play"/></svg>
-                  <span id="assembly-play-text">播放動畫</span>
+                  <span id="assembly-play-text">Play Animation</span>
                 </button>
-                <button class="button quiet" id="assembly-reset" type="button" aria-controls="plot-grid">重設相位</button>
+                <button class="button quiet" id="assembly-reset" type="button" aria-controls="plot-grid">Reset Phase</button>
                 <label class="motion-input">
-                  太陽輪輸入
+                  Sun gear input
                   <span class="input-shell">
                     <input id="assembly-sun-rpm" type="number" step="any" value="12" required aria-describedby="assembly-direction assembly-speed-error">
                     <span class="field-unit">rpm</span>
@@ -178,48 +178,48 @@
                 </label>
               </div>
               <dl class="motion-speeds">
-                <div><dt>行星架</dt><dd>固定</dd></div>
-                <div><dt>兩級行星輪（同軸）</dt><dd><span id="assembly-planet-rpm">—</span> <small>rpm</small></dd></div>
-                <div><dt>內齒輪 (內齒環)輸出</dt><dd><span id="assembly-ring-rpm">—</span> <small>rpm</small></dd></div>
+                <div><dt>Carrier</dt><dd>Fixed</dd></div>
+                <div><dt>Coaxial planet gears</dt><dd><span id="assembly-planet-rpm">—</span> <small>rpm</small></dd></div>
+                <div><dt>Ring gear output</dt><dd><span id="assembly-ring-rpm">—</span> <small>rpm</small></dd></div>
               </dl>
-              <p class="motion-hint" id="assembly-direction">正值為逆時針，負值為順時針。圓點標示各齒輪的旋轉角度。</p>
-              <p class="motion-hint motion-error" id="assembly-speed-error" role="status" hidden>請輸入有效的太陽輪轉速。</p>
+              <p class="motion-hint" id="assembly-direction">Positive speeds are counterclockwise and negative speeds are clockwise. Dots mark each gear's rotation angle.</p>
+              <p class="motion-hint motion-error" id="assembly-speed-error" role="status" hidden>Enter a valid sun gear speed.</p>
             </section>
             <div class="plot-grid" id="plot-grid"></div>
             <div class="plot-footer">
-              <ul class="legend" id="plot-legend" aria-label="齒輪圖例"></ul>
+              <ul class="legend" id="plot-legend" aria-label="Gear legend"></ul>
               <button class="button quiet" id="rotate-gear" type="button" aria-pressed="false" hidden>
                 <svg class="icon" aria-hidden="true"><use href="#icon-rotate"/></svg>
-                <span>旋轉預覽</span>
+                <span>Rotate Preview</span>
               </button>
-              <span class="plot-hint" id="plot-hint">拖曳平移 · Ctrl + 滾輪縮放</span>
+              <span class="plot-hint" id="plot-hint">Drag to pan · Ctrl + scroll to zoom</span>
             </div>
             <dl class="single-stats" id="single-stats" hidden></dl>
             <details class="phase-info" id="phase-info" hidden>
-              <summary>起始嚙合相位與中心距</summary>
+              <summary>Initial Mesh Phases and Center Distances</summary>
               <dl class="phase-values" id="phase-values"></dl>
             </details>
           </div>
           <div class="table-wrap" id="details-content" hidden>
             <table class="data-table">
-              <caption class="sr-only">單顆齒輪幾何詳細參數</caption>
-              <thead><tr><th scope="col">參數</th><th scope="col">數值</th><th scope="col">單位</th></tr></thead>
+              <caption class="sr-only">Detailed single gear geometry</caption>
+              <thead><tr><th scope="col">Parameter</th><th scope="col">Value</th><th scope="col">Unit</th></tr></thead>
               <tbody id="details-body"></tbody>
             </table>
           </div>
           <div class="results-content" id="results-content" hidden>
             <div class="empty-state" id="search-empty">
               <span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg></span>
-              <strong>搜尋齒輪組合</strong>
-              <p>設定左側條件，按「搜尋組合」查看候選齒數。</p>
+              <strong>Search Gear Combinations</strong>
+              <p>Set the search criteria and select Search Combinations to see candidate tooth counts.</p>
             </div>
-            <div class="table-wrap result-table" id="result-table" role="region" aria-label="候選齒輪組合" tabindex="0" hidden>
+            <div class="table-wrap result-table" id="result-table" role="region" aria-label="Candidate gear combinations" tabindex="0" hidden>
               <table class="data-table candidates">
-                <caption class="sr-only">候選組合依齒比及外廓由小到大排列</caption>
+                <caption class="sr-only">Candidates sorted by increasing gear ratio, then by envelope diameter</caption>
                 <thead><tr>
-                  <th scope="col">選取</th><th scope="col">太陽輪</th><th scope="col">行星輪 1</th><th scope="col">行星輪 2</th>
-                  <th scope="col">內齒輪 (內齒環)</th><th scope="col">齒比 <var>z</var></th>
-                  <th scope="col">外廓 (mm)</th><th scope="col">幾何上限組數</th>
+                  <th scope="col">Select</th><th scope="col">Sun Gear</th><th scope="col">Planet Gear 1</th><th scope="col">Planet Gear 2</th>
+                  <th scope="col">Ring Gear</th><th scope="col">Gear ratio <var>z</var></th>
+                  <th scope="col">Envelope (mm)</th><th scope="col">Max. Planet Sets</th>
                 </tr></thead>
                 <tbody id="results-body"></tbody>
               </table>
@@ -227,31 +227,31 @@
             <div class="result-actions">
               <p id="search-status" role="status"></p>
               <button class="button primary" id="apply-candidate" type="button" disabled>
-                產生齒輪系 <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
+                Generate Gear System <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
               </button>
             </div>
-            <p class="table-note">固定內齒輪 (內齒環)、以太陽輪輸入並由行星架輸出時，減速比為 <strong>1 + <var>z</var></strong>。</p>
+            <p class="table-note">With the ring gear fixed, the sun gear as input, and the carrier as output, the reduction ratio is <strong>1 + <var>z</var></strong>.</p>
           </div>
         </div>
       </section>
     </div>
     <footer class="page-footer">
-      <span>齒形與相位供幾何預覽，齒根圓角半徑為參考值。</span>
-      <span>長度單位：mm</span>
+      <span>Tooth profiles and phases are for geometric preview. Root fillet radii are reference values.</span>
+      <span>Lengths in mm</span>
     </footer>
   </main>
 
   <dialog id="cad-dialog" aria-labelledby="cad-title">
     <form id="cad-form" novalidate>
-      <p class="eyebrow">CAD 匯出</p>
-      <h2 id="cad-title">匯出齒輪</h2>
+      <p class="eyebrow">CAD Export</p>
+      <h2 id="cad-title">Export Gear</h2>
       <p class="panel-description" id="cad-description"></p>
       <div class="field-list" id="cad-fields"></div>
       <p class="notice error" id="cad-error" role="alert" hidden></p>
       <div class="dialog-actions">
-        <button type="button" class="button quiet" id="cancel-export">取消</button>
+        <button type="button" class="button quiet" id="cancel-export">Cancel</button>
         <button type="submit" class="button primary" id="download-cad">
-          <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> 下載
+          <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> Download
         </button>
       </div>
     </form>

@@ -2,10 +2,10 @@ import {numberInput, polar, profileSegments, segmentPoint, TAU} from "./gear-mod
 
 export function cadCircleRadius(gear, outerDiameter) {
   if (!gear.internal) return gear.bore / 2;
-  const diameterLabel = `${gear.name}外徑`;
+  const diameterLabel = `${gear.name} outer diameter`;
   const diameter = numberInput(outerDiameter, diameterLabel);
   if (diameter <= gear.geometry.root_diameter) {
-    throw new Error(`${diameterLabel}須大於齒根圓直徑 ${gear.geometry.root_diameter.toPrecision(8)} mm。`);
+    throw new Error(`${diameterLabel} must exceed the root circle diameter of ${gear.geometry.root_diameter.toPrecision(8)} mm.`);
   }
   return diameter / 2;
 }
@@ -35,7 +35,7 @@ export function writeDxf(gear, outerDiameter) {
 const flag = (value) => value ? ".T." : ".F.";
 const tuple = (values) => `(${values.join(",")})`;
 function real(value) {
-  if (!Number.isFinite(value)) throw new Error("STEP 幾何尺寸超出可匯出範圍。");
+  if (!Number.isFinite(value)) throw new Error("The geometry exceeds the supported size range for STEP export.");
   const [mantissa, exponent] = Number(value.toPrecision(15)).toString().split("e");
   return (mantissa.includes(".") ? mantissa : mantissa + ".") + (exponent == null ? "" : `E${exponent}`);
 }
@@ -66,8 +66,8 @@ function flankControls(segment) {
 // planes, and splines swept along Z. It has no faceted or mesh-only entities.
 export function writeStep(gear, outerDiameter, rawThickness) {
   const radius = cadCircleRadius(gear, outerDiameter);
-  const thickness = numberInput(rawThickness, "齒輪厚度");
-  if (thickness <= 0) throw new Error("STEP 齒輪厚度須大於零。");
+  const thickness = numberInput(rawThickness, "Gear thickness");
+  if (thickness <= 0) throw new Error("Gear thickness must be greater than zero for STEP export.");
   const teeth = [...profileSegments(gear)];
   const circle = radius > 0 ? Array.from({length: 4}, (_, i) => ({
     kind: "arc", radius, a0: i * TAU / 4, a1: (i + 1) * TAU / 4,

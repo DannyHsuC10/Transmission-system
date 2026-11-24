@@ -18,7 +18,7 @@ test("browser defaults match the desktop CSV and its geometry", () => {
     const csv = readFileSync(new URL(file, import.meta.url), "utf-8");
     assert.deepEqual(readGearCsv(csv), values);
   }
-  assert.throws(() => readGearCsv("name,value\nTs,21"), /缺少必要參數/);
+  assert.throws(() => readGearCsv("name,value\nTs,21"), /missing required parameters/);
   near(gears[0].geometry.pitch_diameter, 16.8);
   near(gears[0].geometry.tip_diameter, 18.4);
   near(gears[0].geometry.root_diameter, 14.8);
@@ -45,16 +45,16 @@ test("all tooth profiles close and an explicit bore stays independent of the def
       near(Math.hypot(x - nx, y - ny), 0);
     }
   }
-  assert.throws(() => cadCircleRadius(gears[3], 83), /外徑須大於/);
-  assert.throws(() => writeStep(gears[0], null, 0), /厚度須大於零/);
+  assert.throws(() => cadCircleRadius(gears[3], 83), /outer diameter must exceed/);
+  assert.throws(() => writeStep(gears[0], null, 0), /thickness must be greater than zero/);
 });
 
 test("invalid assemblies report center distance, pressure angle and shared phase issues", () => {
   assert.equal(meshPhases(defaults, gears).warnings.length, 0);
-  assert.throws(() => meshPhases({...defaults, Tp2: 25}, gears), /中心距不一致/);
+  assert.throws(() => meshPhases({...defaults, Tp2: 25}, gears), /mesh center distances differ/);
   const settings = {...defaults, profiles: [...defaults.profiles.slice(0, 3), {...defaults.profiles[3], pressure_angle: 22}]};
-  assert.throws(() => meshPhases(settings, makeGears(settings)), /壓力角須相同/);
-  assert.match(meshPhases({...defaults, n: 4}, gears).warnings[0], /無法讓所有等角分布的行星同時嚙合/);
+  assert.throws(() => meshPhases(settings, makeGears(settings)), /must have the same pressure angle/);
+  assert.match(meshPhases({...defaults, n: 4}, gears).warnings[0], /the evenly spaced planets cannot all mesh at the same time/);
   const step = planetPhaseStep(20, 52, 34, 106, 3);
   assert.ok(step > 0);
   for (let i = 0; i < 3; i++) {
@@ -91,5 +91,5 @@ test("search matches Python counts, ordering, spacing and diameter boundary", ()
   const larger = findGearCombinations(defaults, {...criteria, max_diameter: 140});
   assert.equal(larger.total, 1557);
   assert.equal(larger.candidates.length, 200);
-  assert.throws(() => findGearCombinations(defaults, {...criteria, max_diameter: 300}), /搜尋範圍過大/);
+  assert.throws(() => findGearCombinations(defaults, {...criteria, max_diameter: 300}), /search range is too large/);
 });

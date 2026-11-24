@@ -1,31 +1,31 @@
 // Browser port of gear_system_designer.py and gear_search.py.
 export const TAU = 2 * Math.PI;
 export const RAD = Math.PI / 180;
-export const GEAR_NAMES = ["太陽輪", "第一行星輪", "第二行星輪", "內齒輪 (內齒環)"];
+export const GEAR_NAMES = ["Sun Gear", "Planet Gear 1", "Planet Gear 2", "Ring Gear"];
 export const TEETH_KEYS = ["Ts", "Tp1", "Tp2", "Tr"];
 export const SYSTEM_FIELDS = [
-  ["Ts", "太陽輪齒數", "齒"], ["Tp1", "第一行星輪齒數", "齒"],
-  ["Tp2", "第二行星輪齒數", "齒"], ["Tr", `${GEAR_NAMES[3]}齒數`, "齒"],
-  ["M", "模數", "mm"], ["n", "行星輪組數", "組"], ["axle", "預設軸孔", "mm"],
+  ["Ts", "Sun gear tooth count", "teeth"], ["Tp1", "Planet gear 1 tooth count", "teeth"],
+  ["Tp2", "Planet gear 2 tooth count", "teeth"], ["Tr", "Ring gear tooth count", "teeth"],
+  ["M", "Module", "mm"], ["n", "Planet sets"], ["axle", "Default bore diameter", "mm"],
 ];
 export const PROFILE_FIELDS = [
-  ["addendum_ratio", "齒頂倍率"], ["dedendum_ratio", "齒根倍率"],
-  ["space_ratio", "齒間倍率"], ["pressure_angle", "壓力角", "°"],
-  ["fillet_ratio", "齒根圓角倍率（參考）"], ["bore_diameter", "軸孔直徑", "mm"],
+  ["addendum_ratio", "Addendum ratio"], ["dedendum_ratio", "Dedendum ratio"],
+  ["space_ratio", "Tooth space ratio"], ["pressure_angle", "Pressure angle", "°"],
+  ["fillet_ratio", "Root fillet ratio (reference)"], ["bore_diameter", "Bore diameter", "mm"],
 ];
 export const GEOMETRY_ROWS = [
-  ["pitch_diameter", "節圓直徑（節徑）", "mm"],
-  ["pitch_radius", "節圓半徑", "mm"],
-  ["pitch_circumference", "節圓周長", "mm"],
-  ["tip_diameter", "齒頂圓直徑", "mm"], ["tip_radius", "齒頂圓半徑", "mm"],
-  ["root_diameter", "齒根圓直徑", "mm"], ["root_radius", "齒根圓半徑", "mm"],
-  ["base_diameter", "基圓直徑", "mm"], ["base_radius", "基圓半徑", "mm"],
-  ["addendum", "齒頂高", "mm"], ["dedendum", "齒根高", "mm"], ["tooth_height", "齒高", "mm"],
-  ["working_depth", "工作深度", "mm"], ["clearance", "齒輪間隙", "mm"],
-  ["circular_pitch", "周節", "mm"], ["tooth_thickness", "節圓齒厚", "mm"],
-  ["tooth_space", "節圓齒間", "mm"], ["fillet_radius", "齒根圓角半徑（參考）", "mm"],
-  ["diametral_pitch", "徑節（MATLAB 2.54/M）", ""],
-  ["pitch_angle", "周節角度", "rad"], ["half_pitch_angle", "半周節角度", "rad"],
+  ["pitch_diameter", "Pitch diameter", "mm"],
+  ["pitch_radius", "Pitch radius", "mm"],
+  ["pitch_circumference", "Pitch circle circumference", "mm"],
+  ["tip_diameter", "Tip diameter", "mm"], ["tip_radius", "Tip radius", "mm"],
+  ["root_diameter", "Root diameter", "mm"], ["root_radius", "Root radius", "mm"],
+  ["base_diameter", "Base diameter", "mm"], ["base_radius", "Base radius", "mm"],
+  ["addendum", "Addendum", "mm"], ["dedendum", "Dedendum", "mm"], ["tooth_height", "Whole depth", "mm"],
+  ["working_depth", "Working depth", "mm"], ["clearance", "Clearance", "mm"],
+  ["circular_pitch", "Circular pitch", "mm"], ["tooth_thickness", "Tooth thickness at pitch circle", "mm"],
+  ["tooth_space", "Tooth space at pitch circle", "mm"], ["fillet_radius", "Root fillet radius (reference)", "mm"],
+  ["diametral_pitch", "Diametral pitch (MATLAB 2.54/M)", ""],
+  ["pitch_angle", "Pitch angle", "rad"], ["half_pitch_angle", "Half pitch angle", "rad"],
 ];
 export const STANDARD_SETTINGS = Object.freeze({
   addendum_ratio: 1, dedendum_ratio: 1.25, space_ratio: 1, pressure_angle: 20,
@@ -45,18 +45,18 @@ export function numberInput(raw, label) {
   if (typeof raw === "string" && /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw.trim())) {
     raw = Number(raw);
   }
-  if (!Number.isFinite(raw)) throw new Error(`${label}請輸入有效數字。`);
+  if (!Number.isFinite(raw)) throw new Error(`${label} must be a valid number.`);
   return raw;
 }
 
 function positive(value, label) {
-  if (value <= 0) throw new Error(`${label}必須大於零。`);
+  if (value <= 0) throw new Error(`${label} must be greater than zero.`);
   return value;
 }
 
 function boundedInteger(value, label, max) {
   if (!Number.isSafeInteger(value) || value < 1 || value > max) {
-    throw new Error(`${label}須為 1 至 ${max} 的整數。`);
+    throw new Error(`${label} must be an integer from 1 to ${max}.`);
   }
   return value;
 }
@@ -81,22 +81,22 @@ export function readProfileValues(values, internal) {
       settings[key] = numberInput(raw, label);
     }
   }
-  positive(settings.addendum_ratio, "齒頂倍率");
-  positive(settings.dedendum_ratio, "齒根倍率");
+  positive(settings.addendum_ratio, "Addendum ratio");
+  positive(settings.dedendum_ratio, "Dedendum ratio");
   if (!(settings.space_ratio > 0 && settings.space_ratio < 2)) {
-    throw new Error("齒間倍率必須大於 0 且小於 2。");
+    throw new Error("Tooth space ratio must be greater than 0 and less than 2.");
   }
   if (!(settings.pressure_angle > 0 && settings.pressure_angle < 90)) {
-    throw new Error("壓力角必須大於 0° 且小於 90°。");
+    throw new Error("Pressure angle must be greater than 0° and less than 90°.");
   }
   if (settings.fillet_ratio < 0 || settings.bore_diameter < 0) {
-    throw new Error("參考圓角倍率及軸孔直徑須為非負數。");
+    throw new Error("Root fillet ratio and bore diameter must be nonnegative.");
   }
   return settings;
 }
 
 export function readTeeth(raw) {
-  return boundedInteger(numberInput(raw, "齒數"), "齒數", MAX_TEETH);
+  return boundedInteger(numberInput(raw, "Tooth count"), "Tooth count", MAX_TEETH);
 }
 
 // CSV format shared with the desktop CLI, including quoted cells and a UTF-8 BOM.
@@ -123,14 +123,14 @@ export function readGearCsv(text) {
       row = [];
     } else cell += char;
   }
-  if (quoted) throw new Error("CSV 有未關閉的引號。");
+  if (quoted) throw new Error("The CSV contains an unclosed quote.");
   if (row.length || cell) rows.push([...row, cell]);
   const headers = rows.shift()?.map((field) => field.trim()) ?? [];
   const nameColumn = headers.indexOf("name"), valueColumn = headers.indexOf("value");
-  if (nameColumn < 0 || valueColumn < 0) throw new Error("CSV 必須包含 name 和 value 欄位。");
+  if (nameColumn < 0 || valueColumn < 0) throw new Error("The CSV must contain name and value columns.");
   const values = new Map(rows.map((fields) => [fields[nameColumn]?.trim(), fields[valueColumn]]));
   const missing = SYSTEM_FIELDS.map(([key]) => key).filter((key) => !values.has(key));
-  if (missing.length) throw new Error(`CSV 缺少必要參數：${missing.join("、")}。`);
+  if (missing.length) throw new Error(`The CSV is missing required parameters: ${missing.join(", ")}.`);
   return readSystemValues(Object.fromEntries(values));
 }
 
@@ -162,7 +162,7 @@ export function makeGears(design) {
     const teeth = design[key], settings = design.profiles[role];
     const geometry = gearGeometry(design.M, teeth, internal, settings);
     if (!Object.values(geometry).every(Number.isFinite) || !(geometry.pitch_radius > 0)) {
-      throw new Error("幾何尺寸超出可計算範圍，請調整模數與齒形設定。");
+      throw new Error("The geometry exceeds the supported calculation range. Adjust the module and profile settings.");
     }
     return {
       name: GEAR_NAMES[role], role, internal, teeth, settings, geometry,
@@ -228,24 +228,24 @@ export function planetPhaseStep(sun, planet1, planet2, ring, count) {
 
 export function validateMeshPressureAngles(profiles) {
   for (const [first, second, label] of [
-    [0, 1, "太陽輪與第一行星輪"], [2, 3, `第二行星輪與${GEAR_NAMES[3]}`],
+    [0, 1, "Sun gear and planet gear 1"], [2, 3, "Planet gear 2 and ring gear"],
   ]) {
     const a = profiles[first].pressure_angle, b = profiles[second].pressure_angle;
     if (Math.abs(a - b) > EPS * Math.max(Math.abs(a), Math.abs(b))) {
-      throw new Error(`${label}的壓力角須相同才能嚙合。`);
+      throw new Error(`${label} must have the same pressure angle to mesh.`);
     }
   }
 }
 
 export function meshProfileWarnings(profiles) {
   const warnings = [];
-  for (const [a, b, label] of [[0, 1, "太陽輪與第一行星輪"], [2, 3, `第二行星輪與${GEAR_NAMES[3]}`]]) {
+  for (const [a, b, label] of [[0, 1, "Sun gear and planet gear 1"], [2, 3, "Planet gear 2 and ring gear"]]) {
     const first = profiles[a], second = profiles[b];
     if (first.space_ratio + second.space_ratio < 2 - EPS) {
-      warnings.push(`${label}的節圓齒厚總和大於周節。`);
+      warnings.push(`The combined tooth thickness at the pitch circle exceeds the circular pitch for ${label}.`);
     }
     if (first.addendum_ratio > second.dedendum_ratio || second.addendum_ratio > first.dedendum_ratio) {
-      warnings.push(`${label}的齒頂超過配對齒輪的齒根深度。`);
+      warnings.push(`The tooth tips extend beyond the mating root depth for ${label}.`);
     }
   }
   return warnings;
@@ -254,7 +254,7 @@ export function meshProfileWarnings(profiles) {
 export function meshPhases(design, gears) {
   if (design.Ts + design.Tp1 !== design.Tr - design.Tp2) {
     const [external, internal] = centerDistances(design);
-    throw new Error(`兩層嚙合的節圓中心距不一致（${external.toFixed(3)} 與 ${internal.toFixed(3)} mm）。請確認 Tr = Ts + Tp1 + Tp2。`);
+    throw new Error(`The mesh center distances differ (${external.toFixed(3)} and ${internal.toFixed(3)} mm). Check that Tr = Ts + Tp1 + Tp2.`);
   }
   validateMeshPressureAngles(design.profiles);
   const [sun, first, second, ring] = gears.map((gear) => gear.geometry);
@@ -263,7 +263,7 @@ export function meshPhases(design, gears) {
   const step = planetPhaseStep(design.Ts, design.Tp1, design.Tp2, design.Tr, design.n);
   const warnings = meshProfileWarnings(design.profiles);
   if (step === null) {
-    warnings.unshift("此齒數與行星組數無法讓所有等角分布的行星同時嚙合。圖中以第一組對齒。");
+    warnings.unshift("With these tooth counts and planet sets, the evenly spaced planets cannot all mesh at the same time. The preview aligns the first set.");
   }
   return {
     phases: [-offset(sun) - sun.half_pitch_angle, Math.PI - offset(first), -offset(second), -ring.half_pitch_angle],
@@ -279,9 +279,9 @@ export function involuteAngle(radius, base) {
 export function validateGearProfile(g, internal) {
   const {pitch_radius: rp, base_radius: rb, tip_radius: rt, root_radius: rr} = g;
   if (internal && rt < rb) {
-    throw new Error(`${GEAR_NAMES[3]}的齒頂圓半徑小於基圓半徑，無法產生有效漸開線。`);
+    throw new Error("The ring gear tip radius must be at least as large as its base radius to generate a valid involute.");
   }
-  if (rr <= 0) throw new Error("齒根圓半徑須大於零，請調整齒數或齒根倍率。");
+  if (rr <= 0) throw new Error("Root radius must be greater than zero. Adjust the tooth count or dedendum ratio.");
   const start = internal ? rt : Math.max(rr, rb);
   const end = internal ? rr : rt;
   const atPitch = involuteAngle(rp, rb);
@@ -289,12 +289,12 @@ export function validateGearProfile(g, internal) {
   if (internal) {
     const half = g.tooth_thickness / (2 * rp);
     if (half + atStart - atPitch <= 0 || half + atEnd - atPitch >= g.half_pitch_angle) {
-      throw new Error(`${GEAR_NAMES[3]}的齒面交疊，請調整齒間、齒頂或齒根倍率。`);
+      throw new Error("The ring gear tooth flanks overlap. Adjust the tooth space, addendum, or dedendum ratio.");
     }
   } else {
     const gap = g.tooth_space / rp - 2 * atPitch;
     if (gap + 2 * atStart <= 0 || gap + 2 * atEnd >= g.pitch_angle) {
-      throw new Error("外齒輪的齒面交疊，請調整齒間、齒頂或齒根倍率。");
+      throw new Error("The external gear tooth flanks overlap. Adjust the tooth space, addendum, or dedendum ratio.");
     }
   }
   return atPitch;
@@ -309,7 +309,7 @@ export function* profileSegments(gear) {
   const {pitch_radius: rp, base_radius: rb, tip_radius: rt, root_radius: rr, pitch_angle: pitch} = g;
   const atPitch = validateGearProfile(g, internal);
   if (!internal && gear.bore >= g.root_diameter) {
-    throw new Error(`${gear.name}的軸孔直徑須小於齒根圓直徑。`);
+    throw new Error(`${gear.name} bore diameter must be smaller than the root diameter.`);
   }
   const arc = (radius, a0, a1) => ({kind: "arc", radius, a0, a1});
   const radial = (r0, r1, angle) => ({kind: "line", r0, r1, angle});
@@ -350,8 +350,8 @@ export function segmentPoint(segment, t) {
 export function readSearchValues(values) {
   const criteria = {};
   for (const [key, label] of [
-    ["M", "模數"], ["max_diameter", "最大齒輪外廓"], ["min_ratio", "最低齒比"],
-    ["min_teeth", "最小齒數"], ["n", "行星輪組數"],
+    ["M", "Module"], ["max_diameter", "Max. envelope diameter"], ["min_ratio", "Minimum gear ratio"],
+    ["min_teeth", "Minimum tooth count"], ["n", "Planet sets"],
   ]) {
     const value = numberInput(values[key], label);
     criteria[key] = key === "min_teeth" ? boundedInteger(value, label, MAX_TEETH)
@@ -364,7 +364,7 @@ export function findGearCombinations(base, values) {
   const {M, max_diameter, min_ratio, min_teeth, n} = readSearchValues(values);
   validateMeshPressureAngles(base.profiles);
   const warnings = meshProfileWarnings(base.profiles);
-  if (warnings.length) throw new Error(`請先調整單顆設計。\n${warnings.join("\n")}`);
+  if (warnings.length) throw new Error(`Adjust the individual gear profiles before searching.\n${warnings.join("\n")}`);
   const [, first, second, ring] = base.profiles;
   const diameterModules = max_diameter / M;
   const maxRing = Math.floor(diameterModules - 2 * ring.dedendum_ratio + EPS);
@@ -372,7 +372,7 @@ export function findGearCombinations(base, values) {
   const candidates = [];
   if (span < 0) return {total: 0, candidates};
   if ((span + 3) * (span + 2) * (span + 1) / 6 > 2_000_000 || maxRing > MAX_TEETH) {
-    throw new Error("搜尋範圍過大，請縮小外廓上限、提高模數或提高最小齒數。");
+    throw new Error("The search range is too large. Lower the envelope diameter limit, increase the module, or raise the minimum tooth count.");
   }
 
   const cache = Array.from({length: 4}, () => new Map());

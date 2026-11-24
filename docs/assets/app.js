@@ -16,14 +16,14 @@ let searchWorker = null, candidates = [], selectedCandidate = null;
 let cadWorker = null, cadRequest = null;
 
 const SEARCH_FIELDS = [
-  ["M", "模數", "mm"], ["max_diameter", "最大齒輪外廓", "mm"],
-  ["min_ratio", "最低齒比 z"], ["min_teeth", "最小齒數", "齒"], ["n", "行星輪組數", "組"],
+  ["M", "Module", "mm"], ["max_diameter", "Max. envelope diameter", "mm"],
+  ["min_ratio", "Minimum gear ratio z"], ["min_teeth", "Minimum tooth count", "teeth"], ["n", "Planet sets"],
 ];
 const VIEW_LABELS = {
-  layout: ["行星齒輪系節圓配置", "兩級行星輪共用中心，沿行星架等角分布。"],
-  assembly: ["齒輪系組合", "分別查看第一層外嚙合與第二層內嚙合。"],
-  overlay: ["齒輪系全組合", "將兩層齒形投影到同一平面。"],
-  results: ["組合搜尋結果", "候選組合依齒比、外廓由小到大排列。"],
+  layout: ["Planetary Gear Pitch Circle Layout", "The two planet gears in each set share an axis, and the sets are evenly spaced around the carrier."],
+  assembly: ["Gear System Assembly", "View the first-stage external mesh and the second-stage internal mesh separately."],
+  overlay: ["Full Gear System Assembly", "Both stages are projected onto the same plane."],
+  results: ["Combination Search Results", "Candidates are sorted by increasing gear ratio, then by envelope diameter."],
 };
 const MODE_VIEWS = {system: ["layout", "assembly", "overlay"], single: ["single", "details"], search: ["results"]};
 const modeTabs = [...document.querySelectorAll("[data-mode]")];
@@ -76,7 +76,7 @@ function setValues(inputs, values) {
 }
 
 const systemInputs = fillFields($("system-fields"), SYSTEM_FIELDS, {prefix: "system", symbols: true});
-const profileInputs = fillFields($("profile-fields"), [["teeth", "齒數", "齒"], ...PROFILE_FIELDS], {prefix: "profile"});
+const profileInputs = fillFields($("profile-fields"), [["teeth", "Tooth count", "teeth"], ...PROFILE_FIELDS], {prefix: "profile"});
 const searchInputs = fillFields($("search-fields"), SEARCH_FIELDS, {prefix: "search"});
 setValues(systemInputs, defaults);
 setValues(searchInputs, {M: defaults.M, max_diameter: Math.ceil(gearEnvelope(gears)), min_ratio: 8, min_teeth: 20, n: defaults.n});
@@ -143,7 +143,7 @@ function renderSummary() {
   $("metric-diameter").textContent = gearEnvelope(gears).toFixed(2);
   $("single-module").textContent = `${design.M} mm`;
   const [external, internal] = centerDistances(design);
-  $("center-distances").textContent = `外嚙合 ${external.toFixed(3)} ／ 內嚙合 ${internal.toFixed(3)} mm`;
+  $("center-distances").textContent = `External mesh ${external.toFixed(3)} mm / Internal mesh ${internal.toFixed(3)} mm`;
 }
 
 function updateProfileInputs() {
@@ -153,7 +153,7 @@ function updateProfileInputs() {
   $("bore-hint").hidden = role === 3;
 }
 
-function commitDesign(next, message = "已套用參數。") {
+function commitDesign(next, message = "Parameters applied.") {
   const calculated = makeGears(next);
   const searchChanged = next.axle !== design.axle || next.profiles !== design.profiles;
   design = next;
@@ -165,23 +165,23 @@ function commitDesign(next, message = "已套用參數。") {
 }
 
 function showError(error) {
-  status(error.message || "操作未完成，請再試一次。", true);
+  status(error.message || "The operation could not be completed. Try again.", true);
 }
 
-$("system-form").addEventListener("input", () => status("參數已修改。按「更新圖形」或 Enter 套用。"));
+$("system-form").addEventListener("input", () => status("Settings changed. Select Update Preview or press Enter to apply them."));
 $("system-form").addEventListener("submit", (event) => {
   event.preventDefault();
   try {
     commitDesign({...readSystemValues(valuesOf(systemInputs)), profiles: design.profiles});
   } catch (error) {
-    showError(new Error(error.message + " 仍顯示上次套用的結果。"));
+    showError(new Error(error.message + " The preview still shows the last applied settings."));
   }
 });
 
 $("reset-design").addEventListener("click", () => {
   setValues(systemInputs, defaults);
   profileDrafts = defaults.profiles.map((profile) => ({...profile}));
-  commitDesign(defaults, "已還原預設參數。");
+  commitDesign(defaults, "Default parameters restored.");
 });
 
 $("import-csv").addEventListener("click", () => $("csv-file").click());
@@ -190,9 +190,9 @@ $("csv-file").addEventListener("change", async (event) => {
   event.target.value = "";
   if (!file) return;
   try {
-    if (file.size > 1_000_000) throw new Error("參數 CSV 檔案須小於 1 MB。");
+    if (file.size > 1_000_000) throw new Error("The parameter CSV must be smaller than 1 MB.");
     const values = readGearCsv(await file.text());
-    commitDesign({...values, profiles: design.profiles}, `已匯入 ${file.name}。`);
+    commitDesign({...values, profiles: design.profiles}, `Imported ${file.name}.`);
     setValues(systemInputs, values);
     if (mode === "single") updateProfileInputs();
   } catch (error) {
@@ -210,7 +210,7 @@ $("profile-form").addEventListener("input", (event) => {
   const {teeth, ...draft} = valuesOf(profileInputs);
   if (event.target === profileInputs.teeth) systemInputs[TEETH_KEYS[role]].value = teeth;
   profileDrafts[role] = draft;
-  status("齒形已修改。按「套用到齒輪系」或 Enter 更新。");
+  status("Profile changed. Select Apply to Gear System or press Enter to update it.");
 });
 
 $("profile-form").addEventListener("submit", (event) => {
@@ -245,8 +245,8 @@ function notice(message = "", error = false) {
 
 function renderDetails(gear) {
   const rows = [
-    ["齒數", gear.teeth, "齒"], ["壓力角", gear.settings.pressure_angle, "°"],
-    ["軸孔直徑", gear.internal ? "—" : gear.bore.toFixed(6), gear.internal ? "—" : "mm"],
+    ["Tooth count", gear.teeth, "teeth"], ["Pressure angle", gear.settings.pressure_angle, "°"],
+    ["Bore diameter", gear.internal ? "—" : gear.bore.toFixed(6), gear.internal ? "—" : "mm"],
     ...GEOMETRY_ROWS.map(([key, label, unit]) => [label, gear.geometry[key].toFixed(6), unit || "—"]),
   ];
   $("details-body").replaceChildren(...rows.map(([label, value, unit]) => {
@@ -268,8 +268,8 @@ function renderView() {
   plotRoles = [];
   const gear = gears[role];
   const labels = VIEW_LABELS[view] ?? (view === "single"
-    ? [`${gear.name}（${gear.teeth} 齒）`, "查看漸開線輪廓、節圓及軸孔。"]
-    : [`${gear.name}｜詳細參數`, "依目前已套用的齒數、模數與齒形設定計算。"]);
+    ? [`${gear.name} (${gear.teeth} teeth)`, "View the involute profile, pitch circle, and bore."]
+    : [`${gear.name} Geometry Details`, "Calculated from the current tooth count, module, and profile settings."]);
   $("view-title").textContent = labels[0];
   $("view-description").textContent = labels[1];
   const isPlot = view !== "details" && view !== "results";
@@ -298,7 +298,7 @@ function renderView() {
       board.observe();
     }
     $("plot-legend").replaceChildren(...plotRoles.map((index) => {
-      const label = view === "single" ? gear.name + "（虛線為節圓）" : GEAR_NAMES[index];
+      const label = view === "single" ? gear.name + " (dashed pitch circle)" : GEAR_NAMES[index];
       const item = element("li");
       const swatch = element("span", null, view === "layout" && index === 2 ? "legend-swatch dashed" : "legend-swatch");
       swatch.style.setProperty("--gear-color", PLOT_COLORS[index]);
@@ -309,9 +309,9 @@ function renderView() {
     if (view === "single") {
       const g = gear.geometry;
       descriptionList($("single-stats"), [
-        ["節圓", `Ø ${g.pitch_diameter.toFixed(3)} mm`], ["齒頂圓", `Ø ${g.tip_diameter.toFixed(3)} mm`],
-        ["齒根圓", `Ø ${g.root_diameter.toFixed(3)} mm`], ["節圓齒厚", `${g.tooth_thickness.toFixed(3)} mm`],
-        ["節圓齒槽", `${g.tooth_space.toFixed(3)} mm`], ["齒根參考圓角", `R ${g.fillet_radius.toFixed(3)} mm`],
+        ["Pitch circle", `Ø ${g.pitch_diameter.toFixed(3)} mm`], ["Tip circle", `Ø ${g.tip_diameter.toFixed(3)} mm`],
+        ["Root circle", `Ø ${g.root_diameter.toFixed(3)} mm`], ["Tooth thickness at pitch circle", `${g.tooth_thickness.toFixed(3)} mm`],
+        ["Tooth space at pitch circle", `${g.tooth_space.toFixed(3)} mm`], ["Reference root fillet", `R ${g.fillet_radius.toFixed(3)} mm`],
       ]);
       $("single-stats").hidden = false;
       $("rotate-gear").hidden = false;
@@ -319,8 +319,8 @@ function renderView() {
     if (plot.phases) {
       const [external, internal] = centerDistances(design);
       descriptionList($("phase-values"), [
-        ["外嚙合中心距", `${external.toFixed(6)} mm`], ["內嚙合中心距", `${internal.toFixed(6)} mm`],
-        ...plot.phases.map((phase, index) => [GEAR_NAMES[index] + "相位", `${(phase / RAD).toFixed(6)}°`]),
+        ["External mesh center distance", `${external.toFixed(6)} mm`], ["Internal mesh center distance", `${internal.toFixed(6)} mm`],
+        ...plot.phases.map((phase, index) => [GEAR_NAMES[index] + " phase", `${(phase / RAD).toFixed(6)}°`]),
       ]);
       $("phase-info").hidden = false;
     }
@@ -350,7 +350,7 @@ function stopRotation() {
   rotation = null;
   for (const board of boards) board.rotate(0);
   $("rotate-gear").setAttribute("aria-pressed", "false");
-  $("rotate-gear").querySelector("span").textContent = "旋轉預覽";
+  $("rotate-gear").querySelector("span").textContent = "Rotate Preview";
 }
 
 $("rotate-gear").addEventListener("click", () => {
@@ -361,7 +361,7 @@ $("rotate-gear").addEventListener("click", () => {
   const [board] = boards;
   if (!board) return;
   $("rotate-gear").setAttribute("aria-pressed", "true");
-  $("rotate-gear").querySelector("span").textContent = "停止旋轉";
+  $("rotate-gear").querySelector("span").textContent = "Stop Rotation";
   const start = performance.now();
   const frame = (now) => {
     board.rotate(((now - start) * 0.08) % 360);
@@ -371,7 +371,7 @@ $("rotate-gear").addEventListener("click", () => {
 });
 
 function showAssemblyPlaying(playing) {
-  $("assembly-play-text").textContent = playing ? "暫停動畫" : "播放動畫";
+  $("assembly-play-text").textContent = playing ? "Pause Animation" : "Play Animation";
   $("assembly-play-icon").setAttribute("href", playing ? "#icon-pause" : "#icon-play");
 }
 
@@ -447,7 +447,7 @@ function download(blob, name) {
 async function downloadDrawing(drawing, name, format) {
   const blob = format === "SVG" ? new Blob([drawing.content], {type: "image/svg+xml;charset=utf-8"}) : await drawingPng(drawing);
   download(blob, name);
-  status("已匯出 " + name);
+  status("Exported " + name);
 }
 
 $("save-plot").addEventListener("click", async () => {
@@ -481,7 +481,7 @@ function clearSearch(message = "", error = false) {
 function showCandidates(result) {
   candidates = result.candidates;
   if (!result.total) {
-    $("search-status").textContent = "找不到符合條件的組合。可提高外廓上限、降低齒比門檻或減少行星輪組數。";
+    $("search-status").textContent = "No combinations match the criteria. Try increasing the envelope diameter limit, lowering the minimum gear ratio, or using fewer planet sets.";
     return;
   }
   const rows = candidates.map(({design: d, ratio, diameter, maxPlanets}, index) => {
@@ -489,7 +489,7 @@ function showCandidates(result) {
     const radio = element("input");
     radio.type = "radio";
     radio.name = "candidate";
-    radio.setAttribute("aria-label", `選取第 ${index + 1} 組，齒數 ${d.Ts}、${d.Tp1}、${d.Tp2}、${d.Tr}`);
+    radio.setAttribute("aria-label", `Select combination ${index + 1} with tooth counts ${d.Ts}, ${d.Tp1}, ${d.Tp2}, ${d.Tr}`);
     function select() {
       if (selectedCandidate !== null) rows[selectedCandidate].classList.remove("is-selected");
       selectedCandidate = index;
@@ -514,8 +514,8 @@ function showCandidates(result) {
   $("search-empty").hidden = true;
   $("result-table").hidden = false;
   $("result-table").scrollTop = 0;
-  const shown = result.total > candidates.length ? `，顯示前 ${candidates.length} 組` : "";
-  $("search-status").textContent = `找到 ${result.total.toLocaleString("zh-TW")} 組${shown}。選取一列後按「產生齒輪系」。`;
+  const shown = result.total > candidates.length ? `, showing the first ${candidates.length}` : "";
+  $("search-status").textContent = `Found ${result.total.toLocaleString("en")} ${result.total === 1 ? "combination" : "combinations"}${shown}. Select a row, then select Generate Gear System.`;
 }
 
 $("search-form").addEventListener("input", () => clearSearch());
@@ -526,7 +526,7 @@ $("search-form").addEventListener("submit", (event) => {
     const criteria = readSearchValues(valuesOf(searchInputs));
     const worker = new Worker(new URL("./search-worker.js", import.meta.url), {type: "module"});
     searchWorker = worker;
-    $("search-status").textContent = "搜尋中…";
+    $("search-status").textContent = "Searching…";
     $("run-search").disabled = true;
     worker.onmessage = ({data}) => {
       if (searchWorker !== worker) return;
@@ -534,7 +534,7 @@ $("search-form").addEventListener("submit", (event) => {
       if (data.result) showCandidates(data.result);
     };
     worker.onerror = () => {
-      if (searchWorker === worker) clearSearch("無法執行搜尋，請重新整理頁面後再試。", true);
+      if (searchWorker === worker) clearSearch("The search could not run. Refresh the page and try again.", true);
     };
     worker.postMessage({design, criteria});
   } catch (error) {
@@ -546,7 +546,7 @@ $("apply-candidate").addEventListener("click", () => {
   if (selectedCandidate === null) return;
   const next = {...candidates[selectedCandidate].design, profiles: design.profiles};
   try {
-    commitDesign(next, "已套用搜尋結果。");
+    commitDesign(next, "Search result applied.");
     setValues(systemInputs, next);
     changeMode("system", "assembly");
     $("tab-assembly").focus({preventScroll: true});
@@ -567,7 +567,7 @@ function finishCad() {
   cadWorker = null;
   $("export-gear").disabled = false;
   $("download-cad").disabled = false;
-  $("download-cad").lastChild.textContent = " 下載";
+  $("download-cad").lastChild.textContent = " Download";
 }
 
 function exportCad(request, values = {}) {
@@ -582,7 +582,7 @@ function exportCad(request, values = {}) {
     cadWorker = worker;
     $("export-gear").disabled = true;
     $("download-cad").disabled = true;
-    $("download-cad").lastChild.textContent = " 產生中…";
+    $("download-cad").lastChild.textContent = " Generating…";
     cadError("");
     worker.onmessage = ({data}) => {
       if (cadWorker !== worker) return;
@@ -593,10 +593,10 @@ function exportCad(request, values = {}) {
       finishCad();
       if (fromDialog) dialog.close();
       download(new Blob([data.content], {type: "application/octet-stream"}), request.name);
-      status("已匯出 " + request.name);
+      status("Exported " + request.name);
     };
     worker.onerror = () => {
-      if (cadWorker === worker) report("無法產生 CAD 檔案，請重新整理頁面後再試。");
+      if (cadWorker === worker) report("The CAD file could not be generated. Refresh the page and try again.");
     };
     worker.postMessage({...request, ...values});
   } catch (error) {
@@ -627,13 +627,13 @@ $("export-gear").addEventListener("click", async () => {
     exportCad(cadRequest);
     return;
   }
-  $("cad-title").textContent = `匯出 ${format}｜${gear.name}`;
+  $("cad-title").textContent = `Export ${gear.name} as ${format}`;
   $("cad-description").textContent = gear.internal
-    ? `外徑須大於齒根圓直徑 ${Number(gear.geometry.root_diameter.toPrecision(10))} mm。`
-    : "設定齒輪沿軸向拉伸的厚度。";
+    ? `The outer diameter must exceed the root circle diameter of ${Number(gear.geometry.root_diameter.toPrecision(10))} mm.`
+    : "Set the axial thickness of the extruded gear.";
   const fields = [];
-  if (gear.internal) fields.push(["outerDiameter", `${gear.name}外徑`, "mm"]);
-  if (format === "STEP") fields.push(["thickness", "齒輪厚度", "mm"]);
+  if (gear.internal) fields.push(["outerDiameter", `${gear.name} outer diameter`, "mm"]);
+  if (format === "STEP") fields.push(["thickness", "Gear thickness", "mm"]);
   cadInputs = fillFields($("cad-fields"), fields, {prefix: "cad"});
   setValues(cadInputs, {outerDiameter: Number((gear.geometry.root_diameter + 2 * design.M).toPrecision(12)), thickness: 5});
   cadError("");
@@ -655,4 +655,4 @@ renderSummary();
 updateProfileInputs();
 clearSearch();
 changeMode("system");
-status("已載入預設參數。");
+status("Default parameters loaded.");
