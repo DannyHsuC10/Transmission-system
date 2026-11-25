@@ -99,6 +99,37 @@ export function readTeeth(raw) {
   return boundedInteger(numberInput(raw, "Tooth count"), "Tooth count", MAX_TEETH);
 }
 
+const DESIGN_FILE_FORMAT = "gear-system-designer";
+const DESIGN_FILE_VERSION = 1;
+
+export function writeDesignJson(design) {
+  return JSON.stringify({format: DESIGN_FILE_FORMAT, version: DESIGN_FILE_VERSION, design}, null, 2) + "\n";
+}
+
+export function readDesignJson(text) {
+  let file;
+  try {
+    file = JSON.parse(text.replace(/^\uFEFF/, ""));
+  } catch {
+    throw new Error("The file does not contain valid JSON.");
+  }
+  if (file?.format !== DESIGN_FILE_FORMAT) {
+    throw new Error("Select a JSON file exported by Gear System Designer.");
+  }
+  if (file.version !== DESIGN_FILE_VERSION) {
+    throw new Error("This design file version is unsupported.");
+  }
+  const {design} = file;
+  if (!Array.isArray(design?.profiles) || design.profiles.length !== TEETH_KEYS.length
+    || design.profiles.some((profile) => !profile || typeof profile !== "object" || Array.isArray(profile))) {
+    throw new Error("The design file must contain a profile for each of the four gears.");
+  }
+  return {
+    ...readSystemValues(design),
+    profiles: design.profiles.map((profile, role) => readProfileValues(profile, role === 3)),
+  };
+}
+
 // CSV format shared with the desktop CLI, including quoted cells and a UTF-8 BOM.
 export function readGearCsv(text) {
   const rows = [];

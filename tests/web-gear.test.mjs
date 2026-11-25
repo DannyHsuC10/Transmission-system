@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {
   centerDistances, defaultDesign, findGearCombinations, fixedCarrierSpeedRatios, gearEnvelope, makeGears, meshPhases,
-  planetPhaseStep, profileSegments, readGearCsv, readProfileValues, segmentPoint, TAU,
+  planetPhaseStep, profileSegments, readDesignJson, readGearCsv, readProfileValues, segmentPoint, TAU, writeDesignJson,
 } from "../docs/assets/gear-model.js";
 import {cadCircleRadius, writeStep} from "../docs/assets/cad-export.js";
 
@@ -27,6 +27,32 @@ test("browser defaults match the desktop CSV and its geometry", () => {
   near(gears[3].geometry.root_diameter, 83.6);
   centerDistances(defaults).forEach((distance) => near(distance, 31.2));
   near(gearEnvelope(gears), 109.6);
+});
+
+test("JSON saves round-trip system parameters and independent profiles", () => {
+  const design = {
+    ...defaults, Ts: 24, Tp1: 51, Tp2: 27, M: 1.2, n: 2, axle: 8,
+    profiles: [
+      {...defaults.profiles[0], addendum_ratio: 0.9, bore_diameter: 0},
+      {...defaults.profiles[1], bore_diameter: 4.5},
+      {...defaults.profiles[2], pressure_angle: 22},
+      {...defaults.profiles[3], dedendum_ratio: 1.4},
+    ],
+  };
+  const imported = readDesignJson("\uFEFF" + writeDesignJson(design));
+  assert.deepEqual(imported, design);
+  assert.deepEqual(makeGears(imported), makeGears(design));
+});
+
+test("JSON imports reject malformed files, unsupported versions, and invalid settings", () => {
+  const file = JSON.parse(writeDesignJson(defaults));
+  assert.throws(() => readDesignJson("{"), /valid JSON/);
+  assert.throws(() => readDesignJson(JSON.stringify(defaults)), /exported by Gear System Designer/);
+  assert.throws(() => readDesignJson(JSON.stringify({...file, version: 2})), /unsupported/);
+  assert.throws(() => readDesignJson(writeDesignJson({...defaults, profiles: []})), /four gears/);
+  assert.throws(() => readDesignJson(writeDesignJson({...defaults, M: 0})), /Module must be greater than zero/);
+  const profiles = [{...defaults.profiles[0], bore_diameter: -1}, ...defaults.profiles.slice(1)];
+  assert.throws(() => readDesignJson(writeDesignJson({...defaults, profiles})), /must be nonnegative/);
 });
 
 test("all tooth profiles close and an explicit bore stays independent of the default", () => {

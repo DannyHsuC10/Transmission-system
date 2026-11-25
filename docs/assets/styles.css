@@ -66,22 +66,23 @@ h1, h2, p, dl, dd { margin: 0; }
 }
 .brand h1 { margin-block: 4px; font-size: clamp(1.45rem, 3vw, 1.75rem); line-height: 1.22; }
 .brand-description { color: var(--header-text); font-size: .875rem; line-height: 1.5; }
-.topbar-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 8px 14px; }
+.topbar-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: 8px; }
 .local-badge {
   display: inline-flex; align-items: center; gap: 7px;
   color: var(--header-text); font-size: .75rem; white-space: nowrap;
 }
 .local-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--header-highlight); }
-.repo-link {
+.repo-link, .topbar-button {
   display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 6px 10px;
-  font-size: .875rem; font-weight: 600; text-decoration: none; color: #f0f6fc;
+  font-size: .875rem; font-weight: 600; text-decoration: none; color: #f0f6fc; white-space: nowrap;
   border: 1px solid #506179; border-radius: var(--control-radius); background: #1d2b44;
 }
-.repo-link:hover { background: #294157; border-color: #79a4af; }
-.repo-link:focus-visible { outline-color: var(--header-highlight); }
-.repo-link .icon { width: 15px; height: 15px; }
+.repo-link:hover, .topbar-button:hover { background: #294157; border-color: #79a4af; }
+.repo-link:focus-visible, .topbar-button:focus-visible { outline-color: var(--header-highlight); }
+.topbar-actions .icon { width: 15px; height: 15px; }
 
 .page { padding-block: clamp(16px, 2.5vw, 28px) 40px; }
+.save-status:not(:empty) { margin: 0 0 var(--panel-gap); overflow-wrap: anywhere; }
 .eyebrow {
   color: var(--accent-deep);
   font-size: .75rem; font-weight: 700; letter-spacing: .09em;
@@ -316,6 +317,7 @@ dialog .notice { margin: 12px 0 0; }
   .plot-hint { display: none; }
 }
 @media (max-width: 900px) {
+  .local-badge { display: none; }
   .workspace { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
@@ -323,9 +325,13 @@ dialog .notice { margin: 12px 0 0; }
 }
 @media (max-width: 600px) {
   .topbar-inner { grid-template-columns: auto minmax(0, 1fr); }
-  .topbar-actions { grid-column: 1 / -1; justify-content: space-between; }
+  .topbar-actions { grid-column: 1 / -1; }
   .field { grid-template-columns: minmax(0, 1fr) minmax(96px, 40%); }
   .single-stats, .phase-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .repo-link, .topbar-button { padding-inline: 8px; }
+  .topbar-actions .icon { display: none; }
 }
 @media (max-width: 365px) {
   .table-wrap:not(.result-table) .data-table th, .table-wrap:not(.result-table) .data-table td {

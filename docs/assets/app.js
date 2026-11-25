@@ -1,7 +1,7 @@
 import {
   centerDistances, defaultDesign, fixedCarrierSpeedRatios, GEAR_NAMES, gearEnvelope, gearRatio, GEOMETRY_ROWS,
-  makeGears, PROFILE_FIELDS, RAD, readGearCsv, readProfileValues,
-  readSearchValues, readSystemValues, readTeeth, SYSTEM_FIELDS, TEETH_KEYS,
+  makeGears, PROFILE_FIELDS, RAD, readDesignJson, readGearCsv, readProfileValues,
+  readSearchValues, readSystemValues, readTeeth, SYSTEM_FIELDS, TEETH_KEYS, writeDesignJson,
 } from "./gear-model.js";
 import {buildPlot, drawingPng, drawingSvg, PLOT_COLORS} from "./gear-plot.js";
 
@@ -443,6 +443,43 @@ function download(blob, name) {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30_000);
 }
+
+function saveStatus(message, error = false) {
+  const feedback = $("save-status");
+  feedback.textContent = message;
+  feedback.classList.add("notice");
+  feedback.classList.toggle("error", error);
+}
+
+$("export-json").addEventListener("click", () => {
+  try {
+    download(new Blob([writeDesignJson(design)], {type: "application/json"}), "gear-system.json");
+    saveStatus("Exported the applied gear settings.");
+  } catch {
+    saveStatus("The design could not be exported. Try again.", true);
+  }
+});
+
+$("import-json").addEventListener("click", () => $("json-file").click());
+$("json-file").addEventListener("change", async (event) => {
+  const [file] = event.target.files;
+  event.target.value = "";
+  if (!file) return;
+  const importButton = $("import-json");
+  importButton.disabled = true;
+  try {
+    const next = readDesignJson(await file.text());
+    commitDesign(next, "Saved gear settings applied.");
+    setValues(systemInputs, next);
+    profileDrafts = next.profiles.map((profile) => ({...profile}));
+    updateProfileInputs();
+    saveStatus(`Imported ${file.name}.`);
+  } catch (error) {
+    saveStatus(error.message || "The design file could not be read.", true);
+  } finally {
+    importButton.disabled = false;
+  }
+});
 
 async function downloadDrawing(drawing, name, format) {
   const blob = format === "SVG" ? new Blob([drawing.content], {type: "image/svg+xml;charset=utf-8"}) : await drawingPng(drawing);

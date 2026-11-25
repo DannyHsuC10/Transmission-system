@@ -35,14 +35,22 @@
       </div>
       <div class="topbar-actions">
         <span class="local-badge">Runs in your browser</span>
+        <button class="topbar-button" type="button" id="export-json" title="Export applied gear settings">
+          <svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> Export JSON
+        </button>
+        <button class="topbar-button" type="button" id="import-json">
+          <svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg> Import JSON
+        </button>
         <a class="repo-link" href="https://github.com/DannyHsuC10/Transmission-system">
           GitHub <svg class="icon" aria-hidden="true"><use href="#icon-external"/></svg>
         </a>
+        <input type="file" accept=".json,application/json" id="json-file" hidden>
       </div>
     </div>
   </header>
 
   <main class="page" id="workspace">
+    <p class="save-status" id="save-status" role="status"></p>
     <dl class="metrics" aria-label="Applied gear system summary">
       <div class="metric"><dt>Shared module</dt><dd><span id="metric-module">—</span><small>mm</small></dd></div>
       <div class="metric"><dt>Planet sets</dt><dd><span id="metric-planets">—</span></dd></div>
